@@ -54,6 +54,25 @@ namespace brehchat_dotnet
             timer.Tick += PollVisibility;
             timer.Start();
             Config.Overlay = this;
+            Application.ApplicationExit += OnExit;
+            settings.VisibleChanged += Settings_VisibleChanged;
+        }
+
+        private void Settings_VisibleChanged(object? sender, EventArgs e)
+        {
+            if (sender is SettingsForm && ((SettingsForm)sender).Visible == false)
+            {
+                Width = Config.w;
+                Height = Config.h;
+                Location = new(Config.x, Config.y);
+            }
+        }
+
+        private void OnExit(object? sender, EventArgs e)
+        {
+            Config.Write();
+            timer.Dispose();
+            settings.Dispose();
         }
 
         private void PollVisibility(object? sender, EventArgs e)
@@ -113,6 +132,7 @@ namespace brehchat_dotnet
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            settings.Dispose();
             Application.Exit();
         }
 

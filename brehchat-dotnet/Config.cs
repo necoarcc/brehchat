@@ -13,6 +13,7 @@ namespace brehchat_dotnet
         static public int y;
         static public int w;
         static public int h;
+        static public string Token;
         static public Form Overlay;
 
         static public void Read()
@@ -22,10 +23,10 @@ namespace brehchat_dotnet
                 var cfg = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "chat.cfg"));
                 using StringReader reader = new(cfg);
                 List<string> lines = new();
-                string line = "";
+                string? line = "";
                 while ((line = reader.ReadLine()) != null)
                     lines.Add(line);
-                if (lines.Count < 6)
+                if (lines.Count < 7)
                     throw new Exception();
                 w = int.Parse(lines[0]);
                 h = int.Parse(lines[1]);
@@ -33,6 +34,7 @@ namespace brehchat_dotnet
                 y = int.Parse(lines[3]);
                 Target = lines[4];
                 Host = lines[5];
+                Token = lines[6];
             } catch
             {
                 Debug.WriteLine("Failed to read config!");
@@ -44,7 +46,7 @@ namespace brehchat_dotnet
         {
             try
             {
-                File.WriteAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "chat.cfg"), $"{w}\n{h}\n{x}\n{y}\n{Target}\n{Host}");
+                File.WriteAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "chat.cfg"), $"{w}\n{h}\n{x}\n{y}\n{Target}\n{Host}\n{Token}");
             } catch
             {
                 Debug.WriteLine("Failed to write config!");
