@@ -18,11 +18,14 @@ namespace brehchat_dotnet
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
+            Config.InSettings = false;
             Hide();
         }
 
-        private void SettingsForm_Shown(object sender, EventArgs e)
+        private void SettingsForm_VisibleChanged(object? sender, EventArgs e)
         {
+            if (sender is SettingsForm && !((SettingsForm)sender).Visible)
+                return;
             serverbox.Text = Config.Host;
             usernamebox.Text = Config.Token;
             targetbox.Text = Config.Target;
@@ -35,6 +38,7 @@ namespace brehchat_dotnet
             {
                 screenbox.Items.Add(i);
             }
+            Config.InSettings = true;
         }
 
         private void cancelbutt_Click(object sender, EventArgs e)
@@ -57,7 +61,38 @@ namespace brehchat_dotnet
 
         private void testserverbutt_Click(object sender, EventArgs e)
         {
+            if(!Network.Ping())
+            {
+                MessageBox.Show("The server is not responding!");
+            } else
+            {
+                MessageBox.Show("The server is responding!");
+            }
+        }
 
+        private void guieditbutt_Click(object sender, EventArgs e)
+        {
+            if (screenbox.Items.Count == 0 || Screen.AllScreens.Length == 0)
+                return;
+            if (string.IsNullOrWhiteSpace(screenbox.Text))
+            {
+                MessageBox.Show("Please select a screen to show the setting on!");
+                return;
+            }
+            var guieditform = new GUIEditForm();
+            try
+            {
+                if (int.TryParse(screenbox.Text, out int res))
+                    guieditform.display = Screen.AllScreens[res - 1];
+                else
+                    guieditform.display = null;
+            } catch
+            {
+                guieditform.display = null;
+            }
+            MessageBox.Show("Q to exit!");
+            guieditform.Show();
+            Hide();
         }
     }
 }

@@ -221,6 +221,7 @@
             guieditbutt.TabIndex = 17;
             guieditbutt.Text = "GUI Edit";
             guieditbutt.UseVisualStyleBackColor = true;
+            guieditbutt.Click += guieditbutt_Click;
             // 
             // screenbox
             // 
@@ -294,7 +295,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Settings";
             FormClosing += SettingsForm_FormClosing;
-            Shown += SettingsForm_Shown;
+            VisibleChanged += SettingsForm_VisibleChanged;
             ((System.ComponentModel.ISupportInitialize)xbox).EndInit();
             ((System.ComponentModel.ISupportInitialize)ybox).EndInit();
             ((System.ComponentModel.ISupportInitialize)wbox).EndInit();

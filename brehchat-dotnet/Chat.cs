@@ -21,7 +21,8 @@ namespace brehchat_dotnet
         }
 
         private readonly System.Windows.Forms.Timer timer = new();
-        private readonly SettingsForm settings = new();
+        private readonly System.Windows.Forms.Timer connector = new();
+        
 
         private void StealFocus()
         {
@@ -55,7 +56,19 @@ namespace brehchat_dotnet
             timer.Start();
             Config.Overlay = this;
             Application.ApplicationExit += OnExit;
-            settings.VisibleChanged += Settings_VisibleChanged;
+            Config.settings.VisibleChanged += Settings_VisibleChanged;
+            connector.Interval = 30000;
+            connector.Tick += TryConnect;
+            connector.Start();
+            TryConnect(connector, new());
+        }
+
+        private void TryConnect(object? sender, EventArgs e)
+        {
+            if(!Config.InSettings && !Network.Connected && !Network.Connect())
+            {
+                MessageBox.Show("The BrehChat server you chose is not responding!\nIs the token correct?");
+            }
         }
 
         private void Settings_VisibleChanged(object? sender, EventArgs e)
@@ -65,6 +78,7 @@ namespace brehchat_dotnet
                 Width = Config.w;
                 Height = Config.h;
                 Location = new(Config.x, Config.y);
+                Config.InSettings = false;
             }
         }
 
@@ -72,13 +86,17 @@ namespace brehchat_dotnet
         {
             Config.Write();
             timer.Dispose();
-            settings.Dispose();
+            Config.settings.Dispose();
+            connector.Dispose();
         }
 
         private void PollVisibility(object? sender, EventArgs e)
         {
-            if (settings.Visible)
+            if(!Network.Connected || Config.InSettings)
+            {
+                Hide();
                 return;
+            }
 
             HWND fore = PInvoke.GetForegroundWindow();
             PInvoke.GetWindowThreadProcessId(fore, out var pid);
@@ -132,13 +150,13 @@ namespace brehchat_dotnet
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            settings.Dispose();
+            Config.settings.Dispose();
             Application.Exit();
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            settings.Show();
+            Config.settings.Show();
             Hide();
         }
     }

@@ -11,3 +11,4 @@ GetAsyncKeyState
 OpenProcess
 GetModuleFileName
 GetWindowRect
+WM_NCHITTEST
