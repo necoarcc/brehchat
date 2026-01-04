@@ -43,7 +43,6 @@ namespace brehchat_dotnet
             Config.y = child.Bounds.Location.Y;
             Config.w = child.Bounds.Width;
             Config.h = child.Bounds.Height;
-            Config.Write();
             child.Dispose();
             Config.settings.Show();
         }

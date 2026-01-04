@@ -26,6 +26,7 @@ namespace brehchat_dotnet
         {
             if (sender is SettingsForm && !((SettingsForm)sender).Visible)
                 return;
+            Config.Read();
             serverbox.Text = Config.Host;
             usernamebox.Text = Config.Token;
             targetbox.Text = Config.Target;

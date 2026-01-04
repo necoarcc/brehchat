@@ -13,7 +13,7 @@ namespace brehchat_dotnet
             return false;
         }
 
-        static public bool SendMessage()
+        static public bool SendMessage(string text)
         {
             return false;
         }
@@ -21,6 +21,16 @@ namespace brehchat_dotnet
         static public bool Connect()
         {
             return false;
+        }
+
+        static public void Disconnect()
+        {
+
+        }
+
+        static public string[] GetMessages()
+        {
+            return [];
         }
     }
 }

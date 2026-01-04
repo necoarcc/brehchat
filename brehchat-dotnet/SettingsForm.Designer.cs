@@ -307,10 +307,8 @@
         #endregion
 
         private TextBox serverbox;
-        private Label label1;
         private Button testserverbutt;
         private TextBox usernamebox;
-        private Label label2;
         private NumericUpDown xbox;
         private NumericUpDown ybox;
         private NumericUpDown wbox;
