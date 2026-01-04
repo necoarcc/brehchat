@@ -1,0 +1,13 @@
+﻿WINDOW_EX_STYLE
+VIRTUAL_KEY
+SetForegroundWindow
+GetForegroundWindow
+GetWindowThreadProcessId
+AttachThreadInput
+AllocConsole
+FreeConsole
+GetCurrentThreadId
+GetAsyncKeyState
+OpenProcess
+GetModuleFileName
+GetWindowRect
