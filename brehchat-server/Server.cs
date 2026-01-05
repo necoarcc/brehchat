@@ -70,30 +70,39 @@ namespace brehchat_server
         private async Task StopConnections()
         {
             await mut.WaitAsync();
+            List<User> all;
             try
             {
-                foreach (var user in users)
-                {
-                    try
-                    {
-                        await Task.WhenAny(Task.Run(async () =>
-                        {
-                            await user.mut.WaitAsync();
-                            await user.WebSocket.CloseAsync(WebSocketCloseStatus.EndpointUnavailable,
-                                "server stopping", user.TokenSource.Token);
-                            // no need to release user mutex anymore: we're quitting anyway
-                        }), Task.Delay(300));
-                        user.TokenSource.Cancel();
-                    } catch(Exception ex)
-                    {
-                        Console.WriteLine(ex);
-                    }
-                }
+                all = users.ToList();
             }
             finally
             {
                 mut.Release();
             }
+
+            var tasks = all.Select(async user =>
+            {
+                var waiter = user.mut.WaitAsync();
+                try
+                {
+                    var completed = await Task.WhenAny(waiter, Task.Delay(1000));
+                    if (completed == waiter)
+                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.EndpointUnavailable,
+                            "server stopping",
+                            user.TokenSource.Token);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                finally
+                {
+                    user.mut.Release();
+                }
+                user.TokenSource.Cancel();
+            });
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task HandleRequest(HttpListenerContext context)
