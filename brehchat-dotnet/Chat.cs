@@ -149,9 +149,10 @@ namespace brehchat_dotnet
             }
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Config.settings.Dispose();
+            await Network.Disconnect();
             Application.Exit();
         }
 

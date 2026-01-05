@@ -60,15 +60,18 @@ namespace brehchat_dotnet
             Hide();
         }
 
-        private void testserverbutt_Click(object sender, EventArgs e)
+        private async void testserverbutt_Click(object sender, EventArgs e)
         {
-            if(!Network.Ping())
+            var original = Config.Host;
+            Config.Host = serverbox.Text;
+            if (!await Network.Ping())
             {
                 MessageBox.Show("The server is not responding!");
             } else
             {
                 MessageBox.Show("The server is responding!");
             }
+            Config.Host = original;
         }
 
         private void guieditbutt_Click(object sender, EventArgs e)

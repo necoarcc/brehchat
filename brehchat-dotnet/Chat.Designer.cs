@@ -34,6 +34,7 @@
             menu = new ContextMenuStrip(components);
             settingsToolStripMenuItem = new ToolStripMenuItem();
             exitToolStripMenuItem = new ToolStripMenuItem();
+            textbox = new RichTextBox();
             menu.SuspendLayout();
             SuspendLayout();
             // 
@@ -65,6 +66,17 @@
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
+            // textbox
+            // 
+            textbox.DetectUrls = false;
+            textbox.Font = new Font("Segoe UI Black", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 204);
+            textbox.Location = new Point(12, 250);
+            textbox.Multiline = false;
+            textbox.Name = "textbox";
+            textbox.Size = new Size(276, 38);
+            textbox.TabIndex = 1;
+            textbox.Text = "uihefwwwwwwwwwwwwwwwww";
+            // 
             // Chat
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -72,6 +84,7 @@
             BackColor = Color.Black;
             ClientSize = new Size(300, 300);
             ControlBox = false;
+            Controls.Add(textbox);
             FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
@@ -92,5 +105,6 @@
         private ContextMenuStrip menu;
         private ToolStripMenuItem settingsToolStripMenuItem;
         private ToolStripMenuItem exitToolStripMenuItem;
+        private RichTextBox textbox;
     }
 }

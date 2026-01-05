@@ -111,7 +111,7 @@ namespace brehchat_dotnet
 
             try
             {
-                client.Options.AddSubProtocol("brehchat");
+                client.Options.AddSubProtocol("breh.projects.brehchat");
                 client.Options.SetRequestHeader("Token", Config.Token);
                 await client.ConnectAsync(Host.Uri, TokenSource.Token);
                 _ = Task.Run(Connection);
@@ -122,7 +122,7 @@ namespace brehchat_dotnet
                 client.Dispose();
                 return false;
             }
-        }
+        } // USE RICHTEXTBOX FOR CHAT MSGS
 
         static private async Task Connection()
         {
