@@ -99,7 +99,7 @@ namespace brehchat_server
                 {
                     user.mut.Release();
                 }
-                user.TokenSource.Cancel();
+                await user.TokenSource.CancelAsync();
             });
 
             await Task.WhenAll(tasks);
@@ -206,7 +206,7 @@ namespace brehchat_server
                         try
                         {
                             await user.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
-                                "a binary message is never to be sent",
+                                "a binary message is never to be senta binary message is never to be sent",
                                 user.TokenSource.Token);
                         }
                         finally
@@ -281,7 +281,7 @@ namespace brehchat_server
             }
             finally
             {
-                user.TokenSource.Cancel();
+                await user.TokenSource.CancelAsync();
                 user.WebSocket.Abort();
                 await mut.WaitAsync();
                 users.Remove(user);
