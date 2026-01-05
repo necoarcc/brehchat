@@ -147,48 +147,97 @@ namespace brehchat_server
                 while (user.WebSocket.State == WebSocketState.Open && !user.TokenSource.IsCancellationRequested)
                 {
                     var res = await user.WebSocket.ReceiveAsync(buf, user.TokenSource.Token);
+                    byte[] bytes;
                     if (!res.EndOfMessage)
                     {
                         await stream.WriteAsync(buf, 0, res.Count, user.TokenSource.Token);
                         continue;
+                    } else
+                    {
+                        if (stream.Length > 0)
+                        {
+                            await stream.WriteAsync(buf, 0, res.Count, user.TokenSource.Token);
+                            bytes = stream.ToArray();
+                            stream.Seek(0, SeekOrigin.Begin);
+                            stream.SetLength(0);
+                        } else
+                        {
+                            bytes = buf;
+                        }
                     }
-                    var bytes = stream.ToArray();
-                    stream.Seek(0, SeekOrigin.Begin);
-                    stream.SetLength(0);
+                    
                     if (res.MessageType == WebSocketMessageType.Close)
                     {
-                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,
-                            "closing", user.TokenSource.Token);
+                        await user.mut.WaitAsync();
+                        try
+                        {
+                            await user.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,
+                                "closing", user.TokenSource.Token);
+                        }
+                        finally
+                        {
+                            user.mut.Release();
+                        }
                         break;
                     }
                     if (res.MessageType == WebSocketMessageType.Binary)
                     {
-                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
-                            "a binary message is never to be sent",
-                            user.TokenSource.Token);
+                        await user.mut.WaitAsync();
+                        try
+                        {
+                            await user.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
+                                "a binary message is never to be sent",
+                                user.TokenSource.Token);
+                        }
+                        finally
+                        {
+                            user.mut.Release();
+                        }
                         break;
                     }
                     if (bytes.Length > 4096)
                     {
-                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.MessageTooBig,
-                            "the message was too big",
-                            user.TokenSource.Token);
+                        await user.mut.WaitAsync();
+                        try
+                        {
+                            await user.WebSocket.CloseAsync(WebSocketCloseStatus.MessageTooBig,
+                                "the message was too big",
+                                user.TokenSource.Token);
+                        }
+                        finally
+                        {
+                            user.mut.Release();
+                        }
                         break;
                     }
 
                     Message? msg = Message.DecodeMsg(Encoding.UTF8.GetString(bytes));
                     if (!msg.HasValue || msg.Value.Type == MessageType.Invalid)
                     {
-                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData,
-                            "an invalid message has been sent",
-                            user.TokenSource.Token);
+                        await user.mut.WaitAsync();
+                        try
+                        {
+                            await user.WebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData,
+                                "an invalid message has been sent",
+                                user.TokenSource.Token);
+                        }
+                        finally
+                        {
+                            user.mut.Release();
+                        }
                         break;
                     }
                     Message actual = msg.Value;
                     switch (actual.Type)
                     {
+                        case MessageType.SendMessage:
+                            if (actual.Body.Length == 0)
+                                continue;
+                            var response = new Message(MessageType.SendMessage, [user.UserName, .. actual.Body]);
+                            await BroadcastToAll(Encoding.UTF8.GetBytes(response.EncodeMsg()));
+                            break;
                         case MessageType.Ping:
-                            var response = new Message(MessageType.Ping, ["Pong!"]);
+                            response = new Message(MessageType.Ping, ["Pong!"]);
                             bytes = Encoding.UTF8.GetBytes(response.EncodeMsg());
                             await user.mut.WaitAsync();
                             try
@@ -197,7 +246,8 @@ namespace brehchat_server
                                     WebSocketMessageType.Text,
                                     true,
                                     user.TokenSource.Token);
-                            } finally
+                            }
+                            finally
                             {
                                 user.mut.Release();
                             }
@@ -211,8 +261,9 @@ namespace brehchat_server
             }
             finally
             {
-                await mut.WaitAsync();
+                user.TokenSource.Cancel();
                 user.WebSocket.Abort();
+                await mut.WaitAsync();
                 users.Remove(user);
                 mut.Release();
             }
@@ -221,32 +272,39 @@ namespace brehchat_server
         private async Task BroadcastToAll(byte[] what)
         {
             await mut.WaitAsync();
+            List<User> copy;
             try
             {
-                foreach (var user in users)
-                {
-                    await user.mut.WaitAsync();
-                    try
-                    {
-                        await user.WebSocket.SendAsync(what,
-                            WebSocketMessageType.Text,
-                            true,
-                            user.TokenSource.Token);
-                    } catch (Exception ex)
-                    {
-                        Console.WriteLine(ex);
-                    } finally
-                    {
-                        user.mut.Release();
-                    }
-                }
-            } catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            } finally
+                copy = users.ToList();
+            }
+            finally
             {
                 mut.Release();
             }
+
+            var tasks = copy.Select(async user =>
+            {
+                if (user.WebSocket.State != WebSocketState.Open || user.TokenSource.IsCancellationRequested)
+                    return;
+                await user.mut.WaitAsync();
+                try
+                {
+                    await user.WebSocket.SendAsync(what,
+                        WebSocketMessageType.Text,
+                        true,
+                        user.TokenSource.Token);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                finally
+                {
+                    user.mut.Release();
+                }
+            });
+
+            await Task.WhenAll(tasks);
         }
 
         private void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
