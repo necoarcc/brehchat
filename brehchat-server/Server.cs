@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using brehchat_messages;
+using Microsoft.VisualBasic;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 
@@ -50,25 +52,27 @@ namespace brehchat_server
                         break;
                     }
                 }
-                Console.WriteLine("Shutting down...");
-                await Task.WhenAny(WaitForConnections(), Task.Delay(10000));
-                listener.Abort();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 listener.Abort();
+            } finally
+            {
+                Console.WriteLine("Shutting down...");
+                await Task.WhenAny(StopConnections(), Task.Delay(10000));
+                listener.Abort();
             }
         }
 
-        private async Task WaitForConnections()
+        private async Task StopConnections()
         {
             await mut.WaitAsync();
             try
             {
                 foreach (var user in users)
                 {
-                    await user.WebSocket.CloseAsync(WebSocketCloseStatus.EndpointUnavailable, "Going away", user.TokenSource.Token);
+                    user.TokenSource.Cancel();
                 }
             }
             catch (Exception ex)
@@ -133,9 +137,65 @@ namespace brehchat_server
 
         private async Task HandleUser(User user)
         {
-            while(user.WebSocket.State == WebSocketState.Open && !user.TokenSource.IsCancellationRequested)
+            try
             {
-                // ...
+                byte[] buf = new byte[4096];
+                using MemoryStream stream = new();
+                while(user.WebSocket.State == WebSocketState.Open && !user.TokenSource.IsCancellationRequested)
+                {
+                    var res = await user.WebSocket.ReceiveAsync(buf, user.TokenSource.Token);
+                    if(!res.EndOfMessage)
+                    {
+                        await stream.WriteAsync(buf, 0, res.Count, user.TokenSource.Token);
+                        continue;
+                    }
+                    var bytes = stream.ToArray();
+                    stream.Seek(0, SeekOrigin.Begin);
+                    stream.SetLength(0);
+                    if(res.MessageType == WebSocketMessageType.Close)
+                    {
+                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,
+                            "closing", user.TokenSource.Token);
+                        break;
+                    }
+                    if(res.MessageType == WebSocketMessageType.Binary)
+                    {
+                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
+                            "a binary message is never to be sent",
+                            user.TokenSource.Token);
+                        break;
+                    }
+                    if (bytes.Length > 4096)
+                    {
+                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.MessageTooBig,
+                            "the message was too big",
+                            user.TokenSource.Token);
+                        break;
+                    }
+
+                    Message? msg = Message.DecodeMsg(Encoding.UTF8.GetString(bytes));
+                    if(!msg.HasValue || msg.Value.Type == MessageType.Invalid)
+                    {
+                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData,
+                            "an invalid message has been sent",
+                            user.TokenSource.Token);
+                        break;
+                    }
+                    Message actual = msg.Value;
+                    switch (actual.Type)
+                    {
+
+                    }
+                }
+            } catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            } finally
+            {
+                await mut.WaitAsync();
+                user.WebSocket.Abort();
+                users.Remove(user);
+                mut.Release();
             }
         }
 

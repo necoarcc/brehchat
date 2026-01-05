@@ -5,8 +5,11 @@
         public readonly MessageType Type = type;
         public readonly string[] Body = body;
 
-        public static Message DecodeMsg(string msg)
+        public static Message? DecodeMsg(string? msg)
         {
+            if (msg == null)
+                return null;
+
             List<string> all = [];
             using (StringReader reader = new(msg))
             {
@@ -17,7 +20,7 @@
             
             int type;
             if (all.Count < 2 || !int.TryParse(all[0], out type) || !Enum.IsDefined((MessageType)type))
-                return new(MessageType.Invalid, []);
+                return null;
             all.RemoveAt(0);
 
             return new((MessageType)type, [.. all]);

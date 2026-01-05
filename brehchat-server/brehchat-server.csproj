@@ -8,4 +8,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\brehchat-messages\brehchat-messages.csproj" />
+  </ItemGroup>
+
 </Project>
