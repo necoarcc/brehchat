@@ -20,7 +20,7 @@
                 return new(MessageType.Invalid, []);
             all.RemoveAt(0);
 
-            return new((MessageType)type, all.ToArray());
+            return new((MessageType)type, [.. all]);
         }
 
         public string EncodeMsg()
