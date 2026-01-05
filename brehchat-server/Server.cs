@@ -103,10 +103,10 @@ namespace brehchat_server
                     context.Response.Close();
                     return;
                 }
-                var sock = await context.AcceptWebSocketAsync("brehchat");
+                var sock = await context.AcceptWebSocketAsync("breh.projects.brehchat");
                 if (sock == null)
                     return;
-                if(!sock.WebSocket.SubProtocol?.Equals("brehchat") ?? false)
+                if(!sock.WebSocket.SubProtocol?.Equals("breh.projects.brehchat") ?? false)
                 {
                     await sock.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
                         "client must speak brehchat",
@@ -133,7 +133,10 @@ namespace brehchat_server
 
         private async Task HandleUser(User user)
         {
-            await user.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", new());
+            while(user.WebSocket.State == WebSocketState.Open && !user.TokenSource.IsCancellationRequested)
+            {
+                // ...
+            }
         }
 
         private void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
