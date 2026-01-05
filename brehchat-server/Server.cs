@@ -1,5 +1,4 @@
 ﻿using brehchat_messages;
-using Microsoft.VisualBasic;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -13,6 +12,7 @@ namespace brehchat_server
             public WebSocket WebSocket { get; private set; } = wsc;
             public string UserName { get; private set; } = user;
             public CancellationTokenSource TokenSource { get; private set; } = new();
+            public SemaphoreSlim mut = new(1, 1);
         }
 
         private readonly HttpListener listener;
@@ -57,7 +57,8 @@ namespace brehchat_server
             {
                 Console.WriteLine(ex);
                 listener.Abort();
-            } finally
+            }
+            finally
             {
                 Console.WriteLine("Shutting down...");
                 await Task.WhenAny(StopConnections(), Task.Delay(10000));
@@ -78,7 +79,8 @@ namespace brehchat_server
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            } finally
+            }
+            finally
             {
                 mut.Release();
             }
@@ -110,7 +112,7 @@ namespace brehchat_server
                 var sock = await context.AcceptWebSocketAsync("breh.projects.brehchat");
                 if (sock == null)
                     return;
-                if(!sock.WebSocket.SubProtocol?.Equals("breh.projects.brehchat") ?? false)
+                if (!sock.WebSocket.SubProtocol?.Equals("breh.projects.brehchat") ?? false)
                 {
                     await sock.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
                         "client must speak brehchat",
@@ -123,7 +125,8 @@ namespace brehchat_server
                 try
                 {
                     users.Add(user);
-                } finally
+                }
+                finally
                 {
                     mut.Release();
                 }
@@ -141,10 +144,10 @@ namespace brehchat_server
             {
                 byte[] buf = new byte[4096];
                 using MemoryStream stream = new();
-                while(user.WebSocket.State == WebSocketState.Open && !user.TokenSource.IsCancellationRequested)
+                while (user.WebSocket.State == WebSocketState.Open && !user.TokenSource.IsCancellationRequested)
                 {
                     var res = await user.WebSocket.ReceiveAsync(buf, user.TokenSource.Token);
-                    if(!res.EndOfMessage)
+                    if (!res.EndOfMessage)
                     {
                         await stream.WriteAsync(buf, 0, res.Count, user.TokenSource.Token);
                         continue;
@@ -152,13 +155,13 @@ namespace brehchat_server
                     var bytes = stream.ToArray();
                     stream.Seek(0, SeekOrigin.Begin);
                     stream.SetLength(0);
-                    if(res.MessageType == WebSocketMessageType.Close)
+                    if (res.MessageType == WebSocketMessageType.Close)
                     {
                         await user.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,
                             "closing", user.TokenSource.Token);
                         break;
                     }
-                    if(res.MessageType == WebSocketMessageType.Binary)
+                    if (res.MessageType == WebSocketMessageType.Binary)
                     {
                         await user.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
                             "a binary message is never to be sent",
@@ -174,7 +177,7 @@ namespace brehchat_server
                     }
 
                     Message? msg = Message.DecodeMsg(Encoding.UTF8.GetString(bytes));
-                    if(!msg.HasValue || msg.Value.Type == MessageType.Invalid)
+                    if (!msg.HasValue || msg.Value.Type == MessageType.Invalid)
                     {
                         await user.WebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData,
                             "an invalid message has been sent",
@@ -184,17 +187,64 @@ namespace brehchat_server
                     Message actual = msg.Value;
                     switch (actual.Type)
                     {
-
+                        case MessageType.Ping:
+                            var response = new Message(MessageType.Ping, ["Pong!"]);
+                            bytes = Encoding.UTF8.GetBytes(response.EncodeMsg());
+                            await user.mut.WaitAsync();
+                            try
+                            {
+                                await user.WebSocket.SendAsync(bytes,
+                                    WebSocketMessageType.Text,
+                                    true,
+                                    user.TokenSource.Token);
+                            } finally
+                            {
+                                user.mut.Release();
+                            }
+                            break;
                     }
                 }
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            } finally
+            }
+            finally
             {
                 await mut.WaitAsync();
                 user.WebSocket.Abort();
                 users.Remove(user);
+                mut.Release();
+            }
+        }
+
+        private async Task BroadcastToAll(byte[] what)
+        {
+            await mut.WaitAsync();
+            try
+            {
+                foreach (var user in users)
+                {
+                    await user.mut.WaitAsync();
+                    try
+                    {
+                        await user.WebSocket.SendAsync(what,
+                            WebSocketMessageType.Text,
+                            true,
+                            user.TokenSource.Token);
+                    } catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    } finally
+                    {
+                        user.mut.Release();
+                    }
+                }
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            } finally
+            {
                 mut.Release();
             }
         }

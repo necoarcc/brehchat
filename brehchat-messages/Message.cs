@@ -19,7 +19,7 @@
             }
             
             int type;
-            if (all.Count < 2 || !int.TryParse(all[0], out type) || !Enum.IsDefined((MessageType)type))
+            if (all.Count < 1 || !int.TryParse(all[0], out type) || !Enum.IsDefined((MessageType)type))
                 return null;
             all.RemoveAt(0);
 
