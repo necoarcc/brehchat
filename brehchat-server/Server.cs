@@ -1,6 +1,7 @@
 ﻿using brehchat_messages;
 using System.Net;
 using System.Net.WebSockets;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace brehchat_server
@@ -73,12 +74,21 @@ namespace brehchat_server
             {
                 foreach (var user in users)
                 {
-                    user.TokenSource.Cancel();
+                    try
+                    {
+                        await Task.WhenAny(Task.Run(async () =>
+                        {
+                            await user.mut.WaitAsync();
+                            await user.WebSocket.CloseAsync(WebSocketCloseStatus.EndpointUnavailable,
+                                "server stopping", user.TokenSource.Token);
+                            // no need to release user mutex anymore: we're quitting anyway
+                        }), Task.Delay(300));
+                        user.TokenSource.Cancel();
+                    } catch(Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
             }
             finally
             {
