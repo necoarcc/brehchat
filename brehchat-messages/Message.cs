@@ -17,9 +17,8 @@
                 while ((line = reader.ReadLine()) != null)
                     all.Add(line);
             }
-            
-            int type;
-            if (all.Count < 1 || !int.TryParse(all[0], out type) || !Enum.IsDefined((MessageType)type))
+
+            if (all.Count < 1 || !int.TryParse(all[0], out int type) || !Enum.IsDefined((MessageType)type))
                 return null;
             all.RemoveAt(0);
 

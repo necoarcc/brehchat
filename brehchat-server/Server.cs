@@ -73,7 +73,7 @@ namespace brehchat_server
             List<User> all;
             try
             {
-                all = users.ToList();
+                all = [.. users];
             }
             finally
             {
@@ -182,6 +182,7 @@ namespace brehchat_server
                         } else
                         {
                             bytes = buf;
+                            Array.Resize(ref bytes, res.Count);
                         }
                     }
                     
@@ -294,7 +295,7 @@ namespace brehchat_server
             List<User> copy;
             try
             {
-                copy = users.ToList();
+                copy = [.. users];
             }
             finally
             {

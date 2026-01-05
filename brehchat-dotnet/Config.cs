@@ -24,7 +24,7 @@ namespace brehchat_dotnet
             {
                 var cfg = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "chat.cfg"));
                 using StringReader reader = new(cfg);
-                List<string> lines = new();
+                List<string> lines = [];
                 string? line = "";
                 while ((line = reader.ReadLine()) != null)
                     lines.Add(line);

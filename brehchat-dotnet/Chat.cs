@@ -63,9 +63,9 @@ namespace brehchat_dotnet
             TryConnect(connector, new());
         }
 
-        private void TryConnect(object? sender, EventArgs e)
+        private async void TryConnect(object? sender, EventArgs e)
         {
-            if(!Config.InSettings && !Network.Connected && !Network.Connect())
+            if(!Config.InSettings && !Network.Connected && !await Network.Connect())
             {
                 MessageBox.Show("The BrehChat server you chose is not responding!\nIs the token correct?");
             }
@@ -82,12 +82,13 @@ namespace brehchat_dotnet
             }
         }
 
-        private void OnExit(object? sender, EventArgs e)
+        private async void OnExit(object? sender, EventArgs e)
         {
             Config.Write();
             timer.Dispose();
-            Config.settings.Dispose();
             connector.Dispose();
+            await Network.Disconnect();
+            Config.settings.Dispose();
         }
 
         private void PollVisibility(object? sender, EventArgs e)
