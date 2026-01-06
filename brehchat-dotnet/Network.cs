@@ -95,7 +95,25 @@ namespace brehchat_dotnet
 
         static public async Task<bool> SendMessage(string text)
         {
-            return false;
+            await mut.WaitAsync();
+            try
+            {
+                var msg = new brehchat_messages.Message(MessageType.SendMessage, [text]);
+                var bytes = Encoding.UTF8.GetBytes(msg.EncodeMsg());
+                if (bytes.Length > 4096)
+                    Array.Resize(ref bytes, 4096);
+                await client.SendAsync(bytes, WebSocketMessageType.Text,
+                    true, TokenSource.Token);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                mut.Release();
+            }
         }
 
         static public async Task<bool> Connect()
@@ -122,7 +140,7 @@ namespace brehchat_dotnet
                 client.Dispose();
                 return false;
             }
-        } // USE RICHTEXTBOX FOR CHAT MSGS
+        }
 
         static private async Task Connection()
         {
@@ -252,6 +270,7 @@ namespace brehchat_dotnet
             }
             finally
             {
+                await TokenSource.CancelAsync();
                 client.Abort();
                 client.Dispose();
             }
