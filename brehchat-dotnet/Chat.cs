@@ -1,9 +1,9 @@
+using System.Diagnostics;
+using System.Threading.Channels;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 using Windows.Win32.UI.WindowsAndMessaging;
-using Windows.Win32.System.Threading;
-using Windows.Win32.Foundation;
-using Windows.Win32;
-using System.Diagnostics;
 
 namespace brehchat_dotnet
 {
@@ -22,6 +22,10 @@ namespace brehchat_dotnet
 
         private readonly System.Windows.Forms.Timer timer = new();
         private readonly System.Windows.Forms.Timer connector = new();
+        private readonly CancellationTokenSource tokenSource = new();
+        private readonly TaskCompletionSource completionSource = new();
+        private readonly Channel<Network.Msg> channel = Channel.CreateUnbounded<Network.Msg>();
+        private TaskCompletionSource connectorTask = new();
 
 
         private void StealFocus()
@@ -46,6 +50,7 @@ namespace brehchat_dotnet
         {
             InitializeComponent();
             Config.Read();
+            Network.SetChannel(channel);
             StartPosition = FormStartPosition.Manual;
             Width = Config.w;
             Height = Config.h;
@@ -57,18 +62,124 @@ namespace brehchat_dotnet
             Config.Overlay = this;
             Application.ApplicationExit += OnExit;
             Config.settings.VisibleChanged += Settings_VisibleChanged;
-            connector.Interval = 30000;
-            connector.Tick += TryConnect;
+            chatcontainer.Text = "Welcome to BrehChat!";
+            connector.Interval = 15000;
+            connector.Tick += async (object? a, EventArgs b) => { connectorTask.SetResult(); connectorTask = new(); };
             connector.Start();
-            TryConnect(connector, new());
+            _ = Task.Run(Heartbeat);
+            _ = Task.Run(GetMessages);
         }
 
-        private async void TryConnect(object? sender, EventArgs e)
+        private async Task GetMessages()
         {
-            if (!Config.InSettings && !Network.Connected && !await Network.Connect())
+            try
             {
-                MessageBox.Show("The BrehChat server you chose is not responding!\nIs the token correct?");
+                await foreach (var msg in channel.Reader.ReadAllAsync(tokenSource.Token))
+                {
+                    _ = InvokeAsync(() =>
+                    {
+                        AppendToChat(msg);
+                    });
+                }
             }
+            catch (TaskCanceledException)
+            {
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private async Task Heartbeat()
+        {
+            try
+            {
+                var cancellation = Task.Delay(Timeout.Infinite, tokenSource.Token);
+                var dismissed = false;
+                while (!tokenSource.Token.IsCancellationRequested)
+                {
+                    var ticker = connectorTask.Task;
+                    var completed = await Task.WhenAny(ticker, cancellation);
+                    if (ticker == completed)
+                    {
+                        if (!await Network.Ping())
+                        {
+                            await InvokeAsync(() =>
+                               {
+                                   if (!GetLatestChat().Equals(": Reconnecting..."))
+                                       AppendToChat(new Network.Msg("", "Reconnecting..."));
+                                   if (!dismissed)
+                                       MessageBox.Show("The chosen BrehChat server is not responding!");
+                               }, tokenSource.Token);
+                            dismissed = true;
+                            continue;
+                        }
+                        if (!Network.Connected && !await Network.Connect() && !dismissed)
+                        {
+                            await InvokeAsync(() =>
+                            {
+                                if (!GetLatestChat().Equals(": Reconnecting..."))
+                                    AppendToChat(new Network.Msg("", "Reconnecting..."));
+                                if (!dismissed)
+                                    MessageBox.Show("The chosen BrehChat server has failed to authenticate you (is the token correct?)");
+                            }, tokenSource.Token);
+                            dismissed = true;
+                            continue;
+                        }
+                        await InvokeAsync(() =>
+                        {
+                            if (GetLatestChat().Equals(": Reconnecting..."))
+                                AppendToChat(new Network.Msg("", "Connected!"));
+                        });
+                    }
+                    else
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                await InvokeAsync(() =>
+                {
+                    MessageBox.Show(ex.ToString());
+                });
+            }
+            finally
+            {
+                await Network.Disconnect();
+                completionSource.SetResult();
+                if (!tokenSource.Token.IsCancellationRequested)
+                    await InvokeAsync(Application.Exit);
+            }
+        }
+
+        private void AppendToChat(Network.Msg what)
+        {
+            var lines = chatcontainer.Lines;
+            if (lines.Length + 1 > 100)
+            {
+                chatcontainer.SelectionStart = 0;
+                chatcontainer.SelectionLength = lines[0].Length;
+                chatcontainer.SelectedText = "";
+            }
+            var current = chatcontainer.Text.Length;
+            var userstring = what.username + ": ";
+            chatcontainer.AppendText(userstring);
+            chatcontainer.SelectionStart = current;
+            chatcontainer.SelectionLength = userstring.Length;
+            chatcontainer.SelectionColor = Color.BlueViolet;
+            chatcontainer.AppendText(what.body + '\n');
+            chatcontainer.SelectionStart = chatcontainer.Text.Length;
+            chatcontainer.ScrollToCaret();
+        }
+
+        private string GetLatestChat()
+        {
+            var lines = chatcontainer.Lines;
+            if (lines.Length == 0)
+                return "";
+            return lines[lines.Length - 1];
         }
 
         private void Settings_VisibleChanged(object? sender, EventArgs e)
@@ -87,13 +198,13 @@ namespace brehchat_dotnet
             Config.Write();
             timer.Dispose();
             connector.Dispose();
-            await Network.Disconnect();
+            tokenSource.Cancel();
             Config.settings.Dispose();
         }
 
         private void PollVisibility(object? sender, EventArgs e)
         {
-            if (!Network.Connected || Config.InSettings)
+            if (Config.InSettings)
             {
                 Hide();
                 return;
@@ -153,7 +264,8 @@ namespace brehchat_dotnet
         private async void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Config.settings.Dispose();
-            await Network.Disconnect();
+            await tokenSource.CancelAsync();
+            await Task.WhenAny(completionSource.Task, Task.Delay(3500));
             Application.Exit();
         }
 
@@ -164,9 +276,17 @@ namespace brehchat_dotnet
             Hide();
         }
 
-        private void textbox_TextChanged(object sender, EventArgs e)
+        private async void textbox_KeyUp(object sender, KeyEventArgs e)
         {
-
+            if(e.KeyCode == Keys.Return)
+            {
+                e.SuppressKeyPress = true;
+                e.Handled = true;
+                if (!Network.Connected)
+                    await Network.Connect();
+                await Network.SendMessage(textbox.Text);
+                textbox.Text = "";
+            }
         }
     }
 }

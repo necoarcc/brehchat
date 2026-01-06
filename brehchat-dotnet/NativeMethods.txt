@@ -11,4 +11,5 @@ GetAsyncKeyState
 OpenProcess
 GetModuleFileName
 GetWindowRect
-WM_NCHITTEST
+GetWindowLong
+SetWindowLong

@@ -95,6 +95,9 @@ namespace brehchat_dotnet
 
         static public async Task<bool> SendMessage(string text)
         {
+            if (!Connected)
+                return false;
+
             await mut.WaitAsync();
             try
             {

@@ -38,11 +38,12 @@ namespace brehchat_server
                 listener.Start();
 
                 var token = tokenSource.Token;
+                var cancel = Task.Delay(Timeout.Infinite, token);
 
                 while (!token.IsCancellationRequested && listener.IsListening)
                 {
                     var contextTask = listener.GetContextAsync();
-                    var completed = await Task.WhenAny(contextTask, Task.Delay(Timeout.Infinite, token));
+                    var completed = await Task.WhenAny(contextTask, cancel); 
                     if (completed == contextTask)
                     {
                         var context = await contextTask;

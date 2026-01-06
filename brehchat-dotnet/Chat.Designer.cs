@@ -36,7 +36,6 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             textbox = new RichTextBox();
             chatcontainer = new RichTextBox();
-            sendbutt = new Button();
             menu.SuspendLayout();
             SuspendLayout();
             // 
@@ -78,12 +77,14 @@
             textbox.Location = new Point(16, 242);
             textbox.Multiline = false;
             textbox.Name = "textbox";
-            textbox.Size = new Size(221, 46);
+            textbox.Size = new Size(272, 46);
             textbox.TabIndex = 1;
             textbox.Text = "";
+            textbox.KeyUp += textbox_KeyUp;
             // 
             // chatcontainer
             // 
+            chatcontainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             chatcontainer.BackColor = Color.Black;
             chatcontainer.BorderStyle = BorderStyle.None;
             chatcontainer.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 204);
@@ -96,19 +97,6 @@
             chatcontainer.TabIndex = 2;
             chatcontainer.Text = "hi";
             // 
-            // sendbutt
-            // 
-            sendbutt.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            sendbutt.BackColor = Color.Silver;
-            sendbutt.FlatStyle = FlatStyle.Popup;
-            sendbutt.ForeColor = Color.Black;
-            sendbutt.Location = new Point(243, 242);
-            sendbutt.Name = "sendbutt";
-            sendbutt.Size = new Size(45, 46);
-            sendbutt.TabIndex = 3;
-            sendbutt.Text = "Send";
-            sendbutt.UseVisualStyleBackColor = false;
-            // 
             // Chat
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -116,7 +104,6 @@
             BackColor = Color.Black;
             ClientSize = new Size(300, 300);
             ControlBox = false;
-            Controls.Add(sendbutt);
             Controls.Add(chatcontainer);
             Controls.Add(textbox);
             FormBorderStyle = FormBorderStyle.None;
@@ -141,6 +128,5 @@
         private ToolStripMenuItem exitToolStripMenuItem;
         private RichTextBox textbox;
         private RichTextBox chatcontainer;
-        private Button sendbutt;
     }
 }
