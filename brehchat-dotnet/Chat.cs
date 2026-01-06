@@ -22,7 +22,7 @@ namespace brehchat_dotnet
 
         private readonly System.Windows.Forms.Timer timer = new();
         private readonly System.Windows.Forms.Timer connector = new();
-        
+
 
         private void StealFocus()
         {
@@ -65,7 +65,7 @@ namespace brehchat_dotnet
 
         private async void TryConnect(object? sender, EventArgs e)
         {
-            if(!Config.InSettings && !Network.Connected && !await Network.Connect())
+            if (!Config.InSettings && !Network.Connected && !await Network.Connect())
             {
                 MessageBox.Show("The BrehChat server you chose is not responding!\nIs the token correct?");
             }
@@ -93,7 +93,7 @@ namespace brehchat_dotnet
 
         private void PollVisibility(object? sender, EventArgs e)
         {
-            if(!Network.Connected || Config.InSettings)
+            if (!Network.Connected || Config.InSettings)
             {
                 Hide();
                 return;
@@ -116,7 +116,8 @@ namespace brehchat_dotnet
                 }
                 else
                     Hide();
-            } catch
+            }
+            catch
             {
                 Hide();
                 return;
@@ -161,6 +162,11 @@ namespace brehchat_dotnet
             Config.Read();
             Config.settings.Show();
             Hide();
+        }
+
+        private void textbox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
