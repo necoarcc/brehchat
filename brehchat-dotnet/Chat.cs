@@ -135,7 +135,7 @@ namespace brehchat_dotnet
                 {
                     _prev_press = false;
                     StealFocus();
-                    MessageBox.Show("You pressed semicolon or whatever!");
+                    textbox.Focus();
                 }
                 return;
             }
@@ -158,6 +158,7 @@ namespace brehchat_dotnet
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Config.Read();
             Config.settings.Show();
             Hide();
         }

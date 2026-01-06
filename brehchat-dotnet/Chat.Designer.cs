@@ -68,6 +68,7 @@
             // 
             // textbox
             // 
+            textbox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             textbox.DetectUrls = false;
             textbox.Font = new Font("Segoe UI Black", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 204);
             textbox.Location = new Point(12, 250);
@@ -75,7 +76,7 @@
             textbox.Name = "textbox";
             textbox.Size = new Size(276, 38);
             textbox.TabIndex = 1;
-            textbox.Text = "uihefwwwwwwwwwwwwwwwww";
+            textbox.Text = "";
             // 
             // Chat
             // 
