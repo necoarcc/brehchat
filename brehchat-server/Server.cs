@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 
 namespace brehchat_server
 {
@@ -20,6 +21,7 @@ namespace brehchat_server
         private readonly CancellationTokenSource tokenSource;
         private readonly List<User> users;
         private readonly SemaphoreSlim mut;
+        private readonly List<List<string>> tokens;
 
         public Server()
         {
@@ -28,6 +30,11 @@ namespace brehchat_server
             tokenSource = new();
             mut = new(1, 1);
             users = [];
+            using (StreamReader r = new("tokens.json"))
+            {
+                var read = r.ReadToEnd();
+                tokens = JsonSerializer.Deserialize<List<List<string>>>(read) ?? throw new Exception("tokens.json is wrong");
+            }
         }
 
         public async Task Run()
@@ -129,6 +136,23 @@ namespace brehchat_server
                     context.Response.Close();
                     return;
                 }
+                string? username = null;
+                try
+                {
+                    foreach (var pair in tokens)
+                    {
+                        if (pair[0].Equals(context.Request.Headers["Token"]))
+                            username = pair[1];
+                    };
+                    if (username == null)
+                        throw new Exception("notfound");
+                } catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    context.Response.StatusCode = 403;
+                    context.Response.Close();
+                    return;
+                }
                 var sock = await context.AcceptWebSocketAsync("breh.projects.brehchat");
                 if (sock == null)
                     return;
@@ -140,7 +164,7 @@ namespace brehchat_server
                     return;
                 }
 
-                User user = new(sock.WebSocket, "usernamehereplaceholderfornow");
+                User user = new(sock.WebSocket, username);
                 await mut.WaitAsync();
                 try
                 {

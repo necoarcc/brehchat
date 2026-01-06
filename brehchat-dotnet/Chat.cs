@@ -62,7 +62,7 @@ namespace brehchat_dotnet
             Config.Overlay = this;
             Application.ApplicationExit += OnExit;
             Config.settings.VisibleChanged += Settings_VisibleChanged;
-            chatcontainer.Text = "Welcome to BrehChat!";
+            chatcontainer.Text = "Welcome to BrehChat!\n";
             connector.Interval = 15000;
             connector.Tick += async (object? a, EventArgs b) => { connectorTask.SetResult(); connectorTask = new(); };
             connector.Start();
@@ -170,6 +170,9 @@ namespace brehchat_dotnet
             chatcontainer.SelectionLength = userstring.Length;
             chatcontainer.SelectionColor = Color.BlueViolet;
             chatcontainer.AppendText(what.body + '\n');
+            chatcontainer.SelectionStart = chatcontainer.Text.Length - what.body.Length - 1;
+            chatcontainer.SelectionLength = what.body.Length;
+            chatcontainer.SelectionColor = Color.White;
             chatcontainer.SelectionStart = chatcontainer.Text.Length;
             chatcontainer.ScrollToCaret();
         }
@@ -276,14 +279,18 @@ namespace brehchat_dotnet
             Hide();
         }
 
-        private async void textbox_KeyUp(object sender, KeyEventArgs e)
+        private async void textbox_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Return)
+            if (e.KeyCode == Keys.Return)
             {
                 e.SuppressKeyPress = true;
                 e.Handled = true;
                 if (!Network.Connected)
-                    await Network.Connect();
+                    if (!await Network.Connect())
+                    {
+                        MessageBox.Show("The server is not responding.");
+                        return;
+                    }
                 await Network.SendMessage(textbox.Text);
                 textbox.Text = "";
             }

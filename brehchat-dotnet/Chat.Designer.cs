@@ -72,7 +72,7 @@
             textbox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             textbox.BackColor = Color.Silver;
             textbox.DetectUrls = false;
-            textbox.Font = new Font("Segoe UI Black", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 204);
+            textbox.Font = new Font("Segoe UI Black", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 204);
             textbox.ForeColor = Color.Black;
             textbox.Location = new Point(16, 242);
             textbox.Multiline = false;
@@ -80,14 +80,14 @@
             textbox.Size = new Size(272, 46);
             textbox.TabIndex = 1;
             textbox.Text = "";
-            textbox.KeyUp += textbox_KeyUp;
+            textbox.KeyDown += textbox_KeyDown;
             // 
             // chatcontainer
             // 
             chatcontainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             chatcontainer.BackColor = Color.Black;
             chatcontainer.BorderStyle = BorderStyle.None;
-            chatcontainer.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            chatcontainer.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
             chatcontainer.ForeColor = Color.White;
             chatcontainer.Location = new Point(16, 12);
             chatcontainer.Name = "chatcontainer";
