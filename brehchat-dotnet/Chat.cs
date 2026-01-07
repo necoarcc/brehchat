@@ -264,7 +264,7 @@ namespace brehchat_dotnet
             if ((PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_CONTROL) & 0x8000) == 0 &&
                 (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_SHIFT) & 0x8000) == 0 &&
                 (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_MENU) & 0x8000) == 0 &&
-                (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_OEM_1) & 0x8000) != 0)
+                (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_OEM_6) & 0x8000) != 0)
             {
                 _prev_press = true;
             }
