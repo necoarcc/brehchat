@@ -123,6 +123,9 @@ namespace brehchat_dotnet
 
         static public async Task<bool> Connect()
         {
+            if (string.IsNullOrWhiteSpace(Host.Host))
+                return false;
+
             if (Connected)
                 return true;
 
