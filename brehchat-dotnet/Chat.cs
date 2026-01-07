@@ -104,7 +104,7 @@ namespace brehchat_dotnet
                     var completed = await Task.WhenAny(ticker, cancellation);
                     if (ticker == completed)
                     {
-                        if (!await Network.Ping())
+                        if (!Config.InSettings && !await Network.Ping())
                         {
                             await InvokeAsync(() =>
                                {
@@ -116,7 +116,7 @@ namespace brehchat_dotnet
                             dismissed = true;
                             continue;
                         }
-                        if (!Network.Connected && !await Network.Connect() && !dismissed)
+                        if (!Config.InSettings && !Network.Connected && !await Network.Connect())
                         {
                             await InvokeAsync(() =>
                             {

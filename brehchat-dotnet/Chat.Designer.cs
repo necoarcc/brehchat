@@ -92,7 +92,7 @@
             chatcontainer.Location = new Point(16, 12);
             chatcontainer.Name = "chatcontainer";
             chatcontainer.ReadOnly = true;
-            chatcontainer.ScrollBars = RichTextBoxScrollBars.Vertical;
+            chatcontainer.ScrollBars = RichTextBoxScrollBars.None;
             chatcontainer.Size = new Size(272, 224);
             chatcontainer.TabIndex = 2;
             chatcontainer.Text = "hi";

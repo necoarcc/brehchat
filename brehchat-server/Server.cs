@@ -1,7 +1,6 @@
 ﻿using brehchat_messages;
 using System.Net;
 using System.Net.WebSockets;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
@@ -50,7 +49,7 @@ namespace brehchat_server
                 while (!token.IsCancellationRequested && listener.IsListening)
                 {
                     var contextTask = listener.GetContextAsync();
-                    var completed = await Task.WhenAny(contextTask, cancel); 
+                    var completed = await Task.WhenAny(contextTask, cancel);
                     if (completed == contextTask)
                     {
                         var context = await contextTask;
@@ -99,7 +98,7 @@ namespace brehchat_server
                             "server stopping",
                             user.TokenSource.Token);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex);
                 }
@@ -143,12 +142,14 @@ namespace brehchat_server
                     {
                         if (pair[0].Equals(context.Request.Headers["Token"]))
                             username = pair[1];
-                    };
+                    }
+                    ;
                     if (username == null)
                         throw new Exception("notfound");
-                } catch(Exception ex)
+                }
+                catch
                 {
-                    Console.WriteLine(ex);
+                    //Console.WriteLine(ex);
                     context.Response.StatusCode = 403;
                     context.Response.Close();
                     return;
@@ -168,17 +169,26 @@ namespace brehchat_server
                 await mut.WaitAsync();
                 try
                 {
+                    foreach (var us in users)
+                    {
+                        if(us.UserName.Equals(user.UserName))
+                        {
+                            user.WebSocket.Abort();
+                            return;
+                        }
+                    }
                     users.Add(user);
                 }
                 finally
                 {
                     mut.Release();
                 }
+                Console.WriteLine($"Accepted user: {user.UserName}");
                 await HandleUser(user);
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine(ex);
+                //Console.WriteLine(ex);
             }
         }
 
@@ -196,7 +206,8 @@ namespace brehchat_server
                     {
                         await stream.WriteAsync(buf, 0, res.Count, user.TokenSource.Token);
                         continue;
-                    } else
+                    }
+                    else
                     {
                         if (stream.Length > 0)
                         {
@@ -204,13 +215,14 @@ namespace brehchat_server
                             bytes = stream.ToArray();
                             stream.Seek(0, SeekOrigin.Begin);
                             stream.SetLength(0);
-                        } else
+                        }
+                        else
                         {
                             bytes = buf;
                             Array.Resize(ref bytes, res.Count);
                         }
                     }
-                    
+
                     if (res.MessageType == WebSocketMessageType.Close)
                     {
                         await user.mut.WaitAsync();
@@ -300,9 +312,9 @@ namespace brehchat_server
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine(ex);
+                //Console.WriteLine(ex);
             }
             finally
             {
@@ -311,6 +323,7 @@ namespace brehchat_server
                 await mut.WaitAsync();
                 users.Remove(user);
                 mut.Release();
+                Console.WriteLine($"User disconnected: {user.UserName}");
             }
         }
 
@@ -339,9 +352,9 @@ namespace brehchat_server
                         true,
                         user.TokenSource.Token);
                 }
-                catch(Exception ex)
+                catch
                 {
-                    Console.WriteLine(ex);
+                    //Console.WriteLine(ex);
                 }
                 finally
                 {
