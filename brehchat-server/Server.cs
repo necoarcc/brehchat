@@ -169,6 +169,7 @@ namespace brehchat_server
                 await mut.WaitAsync();
                 try
                 {
+                    /*
                     foreach (var us in users)
                     {
                         if(us.UserName.Equals(user.UserName))
@@ -176,7 +177,7 @@ namespace brehchat_server
                             user.WebSocket.Abort();
                             return;
                         }
-                    }
+                    }*/
                     users.Add(user);
                 }
                 finally
