@@ -64,7 +64,7 @@ namespace brehchat_dotnet
             Config.settings.VisibleChanged += Settings_VisibleChanged;
             chatcontainer.Text = "Welcome to BrehChat!\n";
             connector.Interval = 15000;
-            connector.Tick += async (object? a, EventArgs b) => { connectorTask.SetResult(); connectorTask = new(); };
+            connector.Tick += async (object? a, EventArgs b) => { connectorTask.TrySetResult(); };
             connector.Start();
             _ = Task.Run(Heartbeat);
             _ = Task.Run(GetMessages);
@@ -105,6 +105,7 @@ namespace brehchat_dotnet
                     var completed = await Task.WhenAny(ticker, cancellation);
                     if (ticker == completed)
                     {
+                        connectorTask = new();
                         if (!Config.InSettings && !await Network.Ping())
                         {
                             await InvokeAsync(() =>
