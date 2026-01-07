@@ -68,6 +68,7 @@ namespace brehchat_dotnet
             connector.Start();
             _ = Task.Run(Heartbeat);
             _ = Task.Run(GetMessages);
+            connectorTask.SetResult();
         }
 
         private async Task GetMessages()
