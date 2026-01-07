@@ -24,6 +24,8 @@ namespace brehchat_dotnet
                 if (string.IsNullOrWhiteSpace(builder.Scheme)
                     || !(builder.Scheme.Equals("ws") || builder.Scheme.Equals("wss")))
                     builder.Scheme = "wss";
+                if (!builder.Uri.IsLoopback && !builder.Scheme.Equals("wss"))
+                    return new();
                 builder.Path = "";
                 return builder;
             }
