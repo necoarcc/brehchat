@@ -252,7 +252,7 @@ namespace brehchat_dotnet
 
             if (_prev_press)
             {
-                if ((PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_OEM_1) & 0x8000) == 0)
+                if ((PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_OEM_6) & 0x8000) == 0)
                 {
                     _prev_press = false;
                     StealFocus();
@@ -260,6 +260,8 @@ namespace brehchat_dotnet
                 }
                 return;
             }
+
+            
 
             if ((PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_CONTROL) & 0x8000) == 0 &&
                 (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_SHIFT) & 0x8000) == 0 &&
@@ -287,9 +289,8 @@ namespace brehchat_dotnet
 
         private async void textbox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Return)
+            if (e.KeyCode == Keys.Return && !string.IsNullOrWhiteSpace(textbox.Text))
             {
-                e.SuppressKeyPress = true;
                 e.Handled = true;
                 if (!Network.Connected)
                     if (!await Network.Connect())
@@ -299,6 +300,11 @@ namespace brehchat_dotnet
                     }
                 await Network.SendMessage(textbox.Text);
                 textbox.Text = "";
+            }
+            
+            if(e.KeyCode == Keys.Back && textbox.Text.Length == 0)
+            {
+                e.Handled = true;
             }
         }
     }

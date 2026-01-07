@@ -87,6 +87,7 @@
             chatcontainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             chatcontainer.BackColor = Color.Black;
             chatcontainer.BorderStyle = BorderStyle.None;
+            chatcontainer.DetectUrls = false;
             chatcontainer.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
             chatcontainer.ForeColor = Color.White;
             chatcontainer.Location = new Point(16, 12);
