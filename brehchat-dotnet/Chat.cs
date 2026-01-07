@@ -98,7 +98,7 @@ namespace brehchat_dotnet
             try
             {
                 var cancellation = Task.Delay(Timeout.Infinite, tokenSource.Token);
-                var dismissed = false;
+                bool dismissed = false;
                 while (!tokenSource.Token.IsCancellationRequested)
                 {
                     var ticker = connectorTask.Task;
@@ -111,10 +111,12 @@ namespace brehchat_dotnet
                                {
                                    if (!GetLatestChat().Equals(": Reconnecting..."))
                                        AppendToChat(new Network.Msg("", "Reconnecting..."));
-                                   if (!dismissed)
+                                   if (!dismissed && !Config.InSettings)
+                                   {
+                                       dismissed = true;
                                        MessageBox.Show("The chosen BrehChat server is not responding!");
+                                   }
                                }, tokenSource.Token);
-                            dismissed = true;
                             continue;
                         }
                         if (!Config.InSettings && !Network.Connected && !await Network.Connect())
@@ -123,10 +125,12 @@ namespace brehchat_dotnet
                             {
                                 if (!GetLatestChat().Equals(": Reconnecting..."))
                                     AppendToChat(new Network.Msg("", "Reconnecting..."));
-                                if (!dismissed)
+                                if (!dismissed && !Config.InSettings)
+                                {
+                                    dismissed = true;
                                     MessageBox.Show("The chosen BrehChat server has failed to authenticate you (is the token correct?)");
+                                }
                             }, tokenSource.Token);
-                            dismissed = true;
                             continue;
                         }
                         await InvokeAsync(() =>
