@@ -154,10 +154,10 @@ namespace brehchat_server
                     context.Response.Close();
                     return;
                 }
-                var sock = await context.AcceptWebSocketAsync("breh.projects.brehchat");
+                var sock = await context.AcceptWebSocketAsync("brehchat");
                 if (sock == null)
                     return;
-                if (!sock.WebSocket.SubProtocol?.Equals("breh.projects.brehchat") ?? false)
+                if (!sock.WebSocket.SubProtocol?.Equals("brehchat") ?? false)
                 {
                     await sock.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
                         "client must speak brehchat",

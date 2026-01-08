@@ -134,7 +134,7 @@ namespace brehchat_dotnet
 
             try
             {
-                client.Options.AddSubProtocol("breh.projects.brehchat");
+                client.Options.AddSubProtocol("brehchat");
                 client.Options.SetRequestHeader("Token", Config.Token);
                 await client.ConnectAsync(Host.Uri, TokenSource.Token);
                 _ = Task.Run(Connection);
