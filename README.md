@@ -163,10 +163,10 @@ Don't forget to give the project a star! Thanks again!
 ### Top contributors:
 
 <a href="https://github.com/necoarcc/brehchat/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=necoarcc/brehchat" alt="contrib.rocks image" />
+  <img src="https://contrib.rocks/image?repo=necoarcc/brehchat" />
 </a>
 
-
+Made with [contrib.rocks](https://contrib.rocks).
 
 <!-- LICENSE -->
 ## License
