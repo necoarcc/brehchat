@@ -129,11 +129,8 @@ namespace brehchat_dotnet
             if (Connected)
                 return true;
 
-            if (client.State != WebSocketState.None)
-            {
-                client = new();
-                TokenSource = new();
-            }
+            client = new();
+            TokenSource = new();
 
             try
             {
@@ -290,3 +287,4 @@ namespace brehchat_dotnet
         }
     }
 }
+
