@@ -17,12 +17,26 @@ namespace brehchat_dotnet
         static public Form? Overlay;
         static public readonly Form settings = new SettingsForm();
         static public bool InSettings = false;
+        static public bool FirstLaunch = false;
 
         static public void Read()
         {
+            if(!File.Exists(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? "", "firstrun")))
+            {
+                FirstLaunch = true;
+                try
+                {
+                    File.Create(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? "", "firstrun")).Dispose();
+                }
+                catch(Exception ex)
+                {
+                    Debug.WriteLine($"Failed to create firstrun! {ex}");
+                }
+            }
+
             try
             {
-                var cfg = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "chat.cfg"));
+                var cfg = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? "", "chat.cfg"));
                 using StringReader reader = new(cfg);
                 List<string> lines = [];
                 string? line = "";
@@ -37,10 +51,11 @@ namespace brehchat_dotnet
                 Target = lines[4];
                 Host = lines[5];
                 Token = lines[6];
-            } catch
+            } catch (Exception ex)
             {
-                Debug.WriteLine("Failed to read config!");
+                Debug.WriteLine($"Failed to read config! {ex}");
                 Config.Write();
+                FirstLaunch = true;
                 //Application.Exit();
             }
         }

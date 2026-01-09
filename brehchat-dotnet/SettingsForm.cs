@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+﻿using Windows.Win32;
+using Windows.Win32.Foundation;
 
 namespace brehchat_dotnet
 {
@@ -13,6 +8,24 @@ namespace brehchat_dotnet
         public SettingsForm()
         {
             InitializeComponent();
+        }
+
+        public void StealFocus()
+        {
+            HWND handle = (HWND)Handle;
+            PInvoke.SetForegroundWindow(handle);
+            if (PInvoke.GetForegroundWindow() == handle)
+                return;
+            var fore = PInvoke.GetWindowThreadProcessId(PInvoke.GetForegroundWindow());
+            var curr = PInvoke.GetCurrentThreadId();
+            PInvoke.AttachThreadInput(curr, fore, true);
+            PInvoke.SetForegroundWindow(handle);
+            PInvoke.AttachThreadInput(curr, fore, false);
+            if (PInvoke.GetForegroundWindow() == handle)
+                return;
+            PInvoke.AllocConsole();
+            PInvoke.SetForegroundWindow(handle);
+            PInvoke.FreeConsole();
         }
 
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -66,7 +79,8 @@ namespace brehchat_dotnet
             if (!await Network.Ping())
             {
                 MessageBox.Show("The server is not responding!");
-            } else
+            }
+            else
             {
                 MessageBox.Show("The server is responding!");
             }
@@ -89,7 +103,8 @@ namespace brehchat_dotnet
                     guieditform.display = Screen.AllScreens[res - 1];
                 else
                     guieditform.display = null;
-            } catch
+            }
+            catch
             {
                 guieditform.display = null;
             }

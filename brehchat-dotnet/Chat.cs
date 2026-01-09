@@ -69,6 +69,12 @@ namespace brehchat_dotnet
             _ = Task.Run(Heartbeat);
             _ = Task.Run(GetMessages);
             connectorTask.SetResult();
+            if(Config.FirstLaunch)
+            {
+                TrayIcon.ShowBalloonTip(0, "Welcome to Brehchat!", "New here? Brehchat creates an icon in your notification area. You can right click it to either quit Brehchat or configure it.", ToolTipIcon.Info);
+                Config.settings.Show();
+                (Config.settings as SettingsForm)?.StealFocus();
+            }
         }
 
         private async Task GetMessages()
