@@ -185,6 +185,7 @@
             // 
             xbox.Location = new Point(12, 167);
             xbox.Maximum = new decimal(new int[] { 99999999, 0, 0, 0 });
+            xbox.Minimum = new decimal(new int[] { 99999999, 0, 0, int.MinValue });
             xbox.Name = "xbox";
             xbox.Size = new Size(73, 23);
             xbox.TabIndex = 9;
@@ -193,6 +194,7 @@
             // 
             ybox.Location = new Point(91, 167);
             ybox.Maximum = new decimal(new int[] { 99999999, 0, 0, 0 });
+            ybox.Minimum = new decimal(new int[] { 99999999, 0, 0, int.MinValue });
             ybox.Name = "ybox";
             ybox.Size = new Size(73, 23);
             ybox.TabIndex = 11;
