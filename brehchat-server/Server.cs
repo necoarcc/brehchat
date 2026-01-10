@@ -36,11 +36,12 @@ namespace brehchat_server
             }
         }
 
-        public async Task Run()
+        public async Task Run(List<string> prefixes)
         {
             try
             {
-                listener.Prefixes.Add("http://localhost:3062/");
+                foreach (var prefix in prefixes)
+                    listener.Prefixes.Add(new Uri(prefix).ToString());
                 listener.Start();
 
                 var token = tokenSource.Token;
