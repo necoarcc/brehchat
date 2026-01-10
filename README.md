@@ -70,6 +70,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#setting-up-the-server">Setting up the server</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -123,7 +124,26 @@ Simple overlay chat app built with .NET winforms
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Brehchat can overlay over almost any window (except one that is exclusive fullscreen), so you can use it to add chat features to any application it will be handy with. With one keypress, you can focus on brehchat and chat with whoever you need to.
+Brehchat can overlay over almost any window (except one that is exclusive fullscreen), so you can use it to add chat features to any application it will be handy with. With one keypress, you can focus on Brehchat and chat with whoever you need to.
+
+## Setting up the server
+
+1. Download a prebuilt executable or build the server yourself
+2. Write a tokens.json (tokens are like passwords for individual users tied to usernames), the format is json, and should look as follows:
+   ```json
+   [
+     [ "token1", "username1" ],
+     [ "token2", "username2" ],
+     ...
+   ]
+   ```
+3. Optionally, write a prefixes.cfg. The format is plaintext, one prefix per line. You can also pass prefixes as a command argument as so:
+   ```sh
+   path/to/server http://prefix1/ http://prefix2/
+   ```
+   The default prefix, if none specified, is `http://localhost:3062`
+4. Currently, the server doesn't support directly adding ssl certificates, but the client won't connect to insecure remote hosts, so you will have to set up a reverse proxy with HTTPS termination that supports WebSockets. If you have a domain on Cloudflare, you can use Cloudflare Tunnel for free.
+5. Run the server!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
