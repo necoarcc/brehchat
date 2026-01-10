@@ -8,12 +8,12 @@ namespace brehchat_server
 {
     internal sealed class Server
     {
-        private struct User(WebSocket wsc, string user)
+        private readonly struct User(WebSocket wsc, string user)
         {
-            public WebSocket WebSocket { get; private set; } = wsc;
-            public string UserName { get; private set; } = user;
-            public CancellationTokenSource TokenSource { get; private set; } = new();
-            public SemaphoreSlim mut = new(1, 1);
+            public readonly WebSocket WebSocket  = wsc;
+            public readonly string UserName  = user;
+            public readonly CancellationTokenSource TokenSource  = new();
+            public readonly SemaphoreSlim mut = new(1, 1);
         }
 
         private readonly HttpListener listener;
