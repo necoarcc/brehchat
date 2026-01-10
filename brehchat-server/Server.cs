@@ -46,6 +46,8 @@ namespace brehchat_server
                 var token = tokenSource.Token;
                 var cancel = Task.Delay(Timeout.Infinite, token);
 
+                Console.WriteLine($"Listening on address(es) {string.Join(',', listener.Prefixes)}");
+
                 while (!token.IsCancellationRequested && listener.IsListening)
                 {
                     var contextTask = listener.GetContextAsync();
