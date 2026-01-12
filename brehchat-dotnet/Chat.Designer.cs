@@ -36,6 +36,7 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             textbox = new RichTextBox();
             chatcontainer = new RichTextBox();
+            aboutToolStripMenuItem = new ToolStripMenuItem();
             menu.SuspendLayout();
             SuspendLayout();
             // 
@@ -49,21 +50,21 @@
             // menu
             // 
             menu.AccessibleRole = AccessibleRole.None;
-            menu.Items.AddRange(new ToolStripItem[] { settingsToolStripMenuItem, exitToolStripMenuItem });
+            menu.Items.AddRange(new ToolStripItem[] { settingsToolStripMenuItem, aboutToolStripMenuItem, exitToolStripMenuItem });
             menu.Name = "menu";
-            menu.Size = new Size(117, 48);
+            menu.Size = new Size(181, 92);
             // 
             // settingsToolStripMenuItem
             // 
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new Size(116, 22);
+            settingsToolStripMenuItem.Size = new Size(180, 22);
             settingsToolStripMenuItem.Text = "Settings";
             settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(116, 22);
+            exitToolStripMenuItem.Size = new Size(180, 22);
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
@@ -98,6 +99,13 @@
             chatcontainer.TabIndex = 2;
             chatcontainer.Text = "hi";
             // 
+            // aboutToolStripMenuItem
+            // 
+            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            aboutToolStripMenuItem.Size = new Size(180, 22);
+            aboutToolStripMenuItem.Text = "About";
+            aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
+            // 
             // Chat
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -129,5 +137,6 @@
         private ToolStripMenuItem exitToolStripMenuItem;
         private RichTextBox textbox;
         private RichTextBox chatcontainer;
+        private ToolStripMenuItem aboutToolStripMenuItem;
     }
 }

@@ -7,16 +7,16 @@ namespace brehchat_dotnet
 {
     static internal class Config
     {
-        static public string Host = "yourserverhere";
+        static volatile public string Host = "yourserverhere";
         static public string Target = "app.exe";
         static public int x = 0;
         static public int y = 0;
         static public int w = 800;
         static public int h = 600;
-        static public string Token = "yourtokenhere";
+        static volatile public string Token = "yourtokenhere";
         static public Form? Overlay;
         static public readonly Form settings = new SettingsForm();
-        static public bool InSettings = false;
+        static volatile public bool InSettings = false;
         static public bool FirstLaunch = false;
 
         static public void Read()

@@ -69,7 +69,7 @@ namespace brehchat_dotnet
             _ = Task.Run(Heartbeat);
             _ = Task.Run(GetMessages);
             connectorTask.SetResult();
-            if(Config.FirstLaunch)
+            if (Config.FirstLaunch)
             {
                 TrayIcon.ShowBalloonTip(0, "Welcome to Brehchat!", "New here? Brehchat creates an icon in your notification area. You can right click it to either quit Brehchat or configure it.", ToolTipIcon.Info);
                 Config.settings.Show();
@@ -267,7 +267,7 @@ namespace brehchat_dotnet
                 return;
             }
 
-            
+
 
             if ((PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_CONTROL) & 0x8000) == 0 &&
                 (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_SHIFT) & 0x8000) == 0 &&
@@ -288,6 +288,8 @@ namespace brehchat_dotnet
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (Config.InSettings)
+                return;
             Config.Read();
             Config.settings.Show();
             Hide();
@@ -307,11 +309,18 @@ namespace brehchat_dotnet
                 await Network.SendMessage(textbox.Text);
                 textbox.Text = "";
             }
-            
-            if(e.KeyCode == Keys.Back && textbox.Text.Length == 0)
+
+            if (e.KeyCode == Keys.Back && textbox.Text.Length == 0)
             {
                 e.Handled = true;
             }
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Config.InSettings)
+                return;
+            new AboutForm().Show();
         }
     }
 }
