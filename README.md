@@ -22,7 +22,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![GPL-3.0][license-shield]][license-url]
+[![MIT][license-shield]][license-url]
 
 
 
@@ -191,7 +191,7 @@ Made with [contrib.rocks](https://contrib.rocks).
 <!-- LICENSE -->
 ## License
 
-Distributed under the GPL-3.0. See `LICENSE` for more information.
+Distributed under the MIT. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
