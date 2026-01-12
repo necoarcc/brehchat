@@ -49,6 +49,7 @@ namespace brehchat_dotnet
 
         private void GUIEditForm_Shown(object sender, EventArgs e)
         {
+            Config.InSettings = true;
             if (display == null)
             {
                 if (Screen.AllScreens.Length == 0)
@@ -81,7 +82,6 @@ namespace brehchat_dotnet
                 client.Left -= 15;
                 client.Top -= 15;
             }
-            Config.InSettings = true;
         }
 
         private void GUIEditForm_KeyPress(object? sender, KeyPressEventArgs e)
