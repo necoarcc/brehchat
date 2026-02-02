@@ -16,6 +16,10 @@ namespace brehchat_dotnet
             var assembly = Assembly.GetExecutingAssembly();
             verlabel.Text = "v";
             verlabel.Text += assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? assembly.GetName().Version?.ToString() ?? "?.?.? (Can't get version)";
+#if DEBUG
+            verlabel.Text += "(!!DEBUG!!)";
+            verlabel.ForeColor = Color.Red;
+#endif
         }
 
         private void AboutForm_FormClosed(object sender, FormClosedEventArgs e)

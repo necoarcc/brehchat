@@ -48,7 +48,7 @@
             pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
             pictureBox1.Location = new Point(12, 12);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(165, 165);
+            pictureBox1.Size = new Size(175, 165);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
@@ -100,7 +100,7 @@
             // 
             button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             button1.ForeColor = Color.Black;
-            button1.Location = new Point(451, 201);
+            button1.Location = new Point(477, 201);
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 5;
@@ -113,7 +113,7 @@
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.Black;
-            ClientSize = new Size(538, 230);
+            ClientSize = new Size(564, 230);
             Controls.Add(button1);
             Controls.Add(verlabel);
             Controls.Add(label3);
