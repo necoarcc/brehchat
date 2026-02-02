@@ -1,6 +1,7 @@
 ﻿using brehchat_messages;
 using System.Net;
 using System.Net.WebSockets;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 
@@ -202,6 +203,28 @@ namespace brehchat_server
             {
                 byte[] buf = new byte[4096];
                 using MemoryStream stream = new();
+
+                string usersstr;
+                await mut.WaitAsync();
+                try
+                {
+                    usersstr = string.Join(", ", users.Select(us => us.UserName));
+                }
+                finally
+                {
+                    mut.Release();
+                }
+
+                if (!string.IsNullOrWhiteSpace(usersstr))
+                {
+                    await user.mut.WaitAsync();
+                    var usersmsg = new Message(MessageType.SendMessage, ["System", $"Users in chat room: {usersstr}"]);
+                    await user.WebSocket.SendAsync(Encoding.UTF8.GetBytes(usersmsg.EncodeMsg()), WebSocketMessageType.Text, true, user.TokenSource.Token);
+                    user.mut.Release();
+                }
+
+                var joined = new Message(MessageType.SendMessage, ["System", $"{user.UserName} joined the chat room."]);
+                await BroadcastToAll(Encoding.UTF8.GetBytes(joined.EncodeMsg()));
                 while (user.WebSocket.State == WebSocketState.Open && !user.TokenSource.IsCancellationRequested)
                 {
                     var res = await user.WebSocket.ReceiveAsync(buf, user.TokenSource.Token);
@@ -292,7 +315,7 @@ namespace brehchat_server
                     switch (actual.Type)
                     {
                         case MessageType.SendMessage:
-                            if (actual.Body.Length == 0)
+                            if (actual.Body.Length == 0 || actual.Body.All(string.IsNullOrWhiteSpace))
                                 continue;
                             var response = new Message(MessageType.SendMessage, [user.UserName, .. actual.Body]);
                             await BroadcastToAll(Encoding.UTF8.GetBytes(response.EncodeMsg()));
@@ -328,6 +351,8 @@ namespace brehchat_server
                 users.Remove(user);
                 mut.Release();
                 Console.WriteLine($"User disconnected: {user.UserName}");
+                var left = new Message(MessageType.SendMessage, ["System", $"{user.UserName} left the chat room."]);
+                _ = BroadcastToAll(Encoding.UTF8.GetBytes(left.EncodeMsg()));
             }
         }
 

@@ -183,7 +183,6 @@ namespace brehchat_dotnet
             chatcontainer.SelectionLength = 0;
             chatcontainer.SelectionStart = chatcontainer.TextLength;
 
-            var current = chatcontainer.Text.Length;
             var userstring = what.username + ": ";
 
             chatcontainer.SelectionColor = Color.BlueViolet;
