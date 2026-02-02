@@ -116,8 +116,8 @@ namespace brehchat_dotnet
                         {
                             await InvokeAsync(() =>
                                {
-                                   if (!GetLatestChat().Equals(": Reconnecting..."))
-                                       AppendToChat(new Network.Msg("", "Reconnecting..."));
+                                   if (!GetLatestChat().Equals("System: Reconnecting..."))
+                                       AppendToChat(new Network.Msg("System", "Reconnecting..."));
                                    if (!dismissed && !Config.InSettings)
                                    {
                                        dismissed = true;
@@ -130,8 +130,8 @@ namespace brehchat_dotnet
                         {
                             await InvokeAsync(() =>
                             {
-                                if (!GetLatestChat().Equals(": Reconnecting..."))
-                                    AppendToChat(new Network.Msg("", "Reconnecting..."));
+                                if (!GetLatestChat().Equals("System: Reconnecting..."))
+                                    AppendToChat(new Network.Msg("System", "Reconnecting..."));
                                 if (!dismissed && !Config.InSettings)
                                 {
                                     dismissed = true;
@@ -142,8 +142,8 @@ namespace brehchat_dotnet
                         }
                         await InvokeAsync(() =>
                         {
-                            if (GetLatestChat().Equals(": Reconnecting..."))
-                                AppendToChat(new Network.Msg("", "Connected!"));
+                            if (GetLatestChat().Equals("System: Reconnecting..."))
+                                AppendToChat(new Network.Msg("System", "Connected!"));
                         });
                     }
                     else
@@ -168,25 +168,34 @@ namespace brehchat_dotnet
 
         private void AppendToChat(Network.Msg what)
         {
+            chatcontainer.SuspendLayout();
+
             var lines = chatcontainer.Lines;
             if (lines.Length + 1 > 100)
             {
+                chatcontainer.ReadOnly = false;
                 chatcontainer.SelectionStart = 0;
-                chatcontainer.SelectionLength = lines[0].Length;
+                chatcontainer.Select(0, chatcontainer.GetFirstCharIndexFromLine(20));
                 chatcontainer.SelectedText = "";
+                chatcontainer.ReadOnly = true;
             }
+
+            chatcontainer.SelectionLength = 0;
+            chatcontainer.SelectionStart = chatcontainer.TextLength;
+
             var current = chatcontainer.Text.Length;
             var userstring = what.username + ": ";
-            chatcontainer.AppendText(userstring);
-            chatcontainer.SelectionStart = current;
-            chatcontainer.SelectionLength = userstring.Length;
+
             chatcontainer.SelectionColor = Color.BlueViolet;
-            chatcontainer.AppendText(what.body + '\n');
-            chatcontainer.SelectionStart = chatcontainer.Text.Length - what.body.Length - 1;
-            chatcontainer.SelectionLength = what.body.Length;
-            chatcontainer.SelectionColor = Color.White;
-            chatcontainer.SelectionStart = chatcontainer.Text.Length;
+            chatcontainer.AppendText(userstring);
+
+            chatcontainer.SelectionColor = Color.White; 
+            chatcontainer.AppendText(what.body + Environment.NewLine);
+
             chatcontainer.ScrollToCaret();
+            chatcontainer.SelectionLength = 0;
+
+            chatcontainer.ResumeLayout();
         }
 
         private string GetLatestChat()
@@ -194,7 +203,7 @@ namespace brehchat_dotnet
             var lines = chatcontainer.Lines;
             if (lines.Length == 0)
                 return "";
-            return lines[lines.Length - 1];
+            return lines[^2];
         }
 
         private void Settings_VisibleChanged(object? sender, EventArgs e)
