@@ -37,6 +37,7 @@
             Label label7;
             Label label8;
             Label label9;
+            Label label10;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             serverbox = new TextBox();
             testserverbutt = new Button();
@@ -50,6 +51,7 @@
             okbutt = new Button();
             cancelbutt = new Button();
             targetbox = new TextBox();
+            opacbox = new NumericUpDown();
             label1 = new Label();
             label2 = new Label();
             label4 = new Label();
@@ -59,10 +61,12 @@
             label7 = new Label();
             label8 = new Label();
             label9 = new Label();
+            label10 = new Label();
             ((System.ComponentModel.ISupportInitialize)xbox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)ybox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)wbox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)hbox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)opacbox).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -154,6 +158,16 @@
             label9.Size = new Size(83, 15);
             label9.TabIndex = 23;
             label9.Text = "Target Process";
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.ForeColor = Color.White;
+            label10.Location = new Point(169, 211);
+            label10.Name = "label10";
+            label10.Size = new Size(48, 15);
+            label10.TabIndex = 25;
+            label10.Text = "Opacity";
             // 
             // serverbox
             // 
@@ -262,12 +276,21 @@
             targetbox.Size = new Size(167, 23);
             targetbox.TabIndex = 22;
             // 
+            // opacbox
+            // 
+            opacbox.Location = new Point(169, 233);
+            opacbox.Name = "opacbox";
+            opacbox.Size = new Size(48, 23);
+            opacbox.TabIndex = 24;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.Black;
             ClientSize = new Size(349, 332);
+            Controls.Add(label10);
+            Controls.Add(opacbox);
             Controls.Add(label9);
             Controls.Add(targetbox);
             Controls.Add(cancelbutt);
@@ -302,6 +325,7 @@
             ((System.ComponentModel.ISupportInitialize)ybox).EndInit();
             ((System.ComponentModel.ISupportInitialize)wbox).EndInit();
             ((System.ComponentModel.ISupportInitialize)hbox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)opacbox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -320,5 +344,6 @@
         private Button okbutt;
         private Button cancelbutt;
         private TextBox targetbox;
+        private NumericUpDown opacbox;
     }
 }

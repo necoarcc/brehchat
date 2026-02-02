@@ -46,6 +46,7 @@ namespace brehchat_dotnet
             ybox.Value = Config.y;
             wbox.Value = Config.w;
             hbox.Value = Config.h;
+            opacbox.Value = Config.Opacity;
             screenbox.Items.Clear();
             for (int i = 1; i <= Screen.AllScreens.Length; ++i)
             {
@@ -68,6 +69,7 @@ namespace brehchat_dotnet
             Config.y = (int)ybox.Value;
             Config.w = (int)wbox.Value;
             Config.h = (int)hbox.Value;
+            Config.Opacity = (int)opacbox.Value;
             Config.Write();
             Hide();
         }

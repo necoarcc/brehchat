@@ -54,6 +54,7 @@ namespace brehchat_dotnet
             StartPosition = FormStartPosition.Manual;
             Width = Config.w;
             Height = Config.h;
+            Opacity = (double)Config.Opacity / 100;
             Location = new(Config.x, Config.y);
             timer.Interval = 20;
             timer.Tick += PollInput;
@@ -212,6 +213,7 @@ namespace brehchat_dotnet
                 Width = Config.w;
                 Height = Config.h;
                 Location = new(Config.x, Config.y);
+                Opacity = (double)Config.Opacity / 100;
                 Config.InSettings = false;
             }
         }
