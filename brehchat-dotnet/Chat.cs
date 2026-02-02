@@ -232,7 +232,7 @@ namespace brehchat_dotnet
             try
             {
                 var process = Process.GetProcessById((int)pid).MainModule?.FileName;
-                if (Path.GetFileName(process).Equals(Config.Target))
+                if (Path.GetFileName(process)?.Equals(Config.Target) ?? false)
                 {
                     PInvoke.GetWindowRect(fore, out var rect);
                     var target = Screen.GetBounds((Rectangle)rect);
@@ -321,6 +321,12 @@ namespace brehchat_dotnet
             if (Config.InSettings)
                 return;
             new AboutForm().Show();
+        }
+
+        private void chatcontainer_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Back || e.KeyCode == Keys.Return)
+                e.Handled = true;
         }
     }
 }
