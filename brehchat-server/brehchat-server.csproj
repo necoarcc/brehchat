@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\brehchat-messages\brehchat-messages.csproj" />
+	  <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>

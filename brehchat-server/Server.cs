@@ -3,16 +3,20 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
 namespace brehchat_server
 {
     internal sealed class Server
     {
-        private readonly struct User(WebSocket wsc, string user)
+        private readonly struct User(WebSocket wsc, string user, CancellationTokenSource cts)
         {
             public readonly WebSocket WebSocket  = wsc;
             public readonly string UserName  = user;
-            public readonly CancellationTokenSource TokenSource  = new();
+            public readonly CancellationTokenSource TokenSource  = cts;
             public readonly SemaphoreSlim mut = new(1, 1);
         }
 
@@ -38,162 +42,106 @@ namespace brehchat_server
 
         public async Task Run(List<string> prefixes)
         {
+            var builder = WebApplication.CreateBuilder();
+            builder.WebHost.UseUrls([.. prefixes]);
+
+            using WebApplication app = builder.Build();
+            app.UseWebSockets();
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method != HttpMethods.Get)
+                {
+                    context.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+                    return;
+                }
+                await next();
+            });
+            app.MapGet("/brehchatping", () => "Pong!");
+            app.MapGet("/", Authenticate);
+            Console.WriteLine($"Listening on: {string.Join(", ", prefixes)}");
+
             try
             {
-                foreach (var prefix in prefixes)
-                    listener.Prefixes.Add(new Uri(prefix).ToString());
-                listener.Start();
-
-                var token = tokenSource.Token;
-                var cancel = Task.Delay(Timeout.Infinite, token);
-
-                Console.WriteLine($"Listening on address(es) {string.Join(',', listener.Prefixes)}");
-
-                while (!token.IsCancellationRequested && listener.IsListening)
-                {
-                    var contextTask = listener.GetContextAsync();
-                    var completed = await Task.WhenAny(contextTask, cancel);
-                    if (completed == contextTask)
-                    {
-                        var context = await contextTask;
-                        _ = Task.Run(async () => await HandleRequest(context));
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                await app.RunAsync(tokenSource.Token);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                listener.Abort();
-            }
-            finally
+            catch (OperationCanceledException)
             {
                 Console.WriteLine("Shutting down...");
-                await Task.WhenAny(StopConnections(), Task.Delay(10000));
-                listener.Abort();
+            }
+            catch (Exception e)
+            {
+                Console.Write($"A critical error has ocurred:\n{e}");
             }
         }
 
-        private async Task StopConnections()
+        private async Task Authenticate(HttpContext ctx)
         {
-            await mut.WaitAsync();
-            List<User> all;
-            try
+            if(!ctx.WebSockets.IsWebSocketRequest)
             {
-                all = [.. users];
-            }
-            finally
-            {
-                mut.Release();
+                ctx.Response.StatusCode = 400;
+                await ctx.Response.CompleteAsync();
+                return;
             }
 
-            var tasks = all.Select(async user =>
+            string? username = null;
+            if(!ctx.Request.Headers.TryGetValue("Token", out var token))
             {
-                var waiter = user.mut.WaitAsync();
-                try
-                {
-                    var completed = await Task.WhenAny(waiter, Task.Delay(1000));
-                    if (completed == waiter)
-                        await user.WebSocket.CloseAsync(WebSocketCloseStatus.EndpointUnavailable,
-                            "server stopping",
-                            user.TokenSource.Token);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-                finally
-                {
-                    user.mut.Release();
-                }
-                await user.TokenSource.CancelAsync();
-            });
-
-            await Task.WhenAll(tasks);
-        }
-
-        private async Task HandleRequest(HttpListenerContext context)
-        {
+                ctx.Response.StatusCode = 403;
+                await ctx.Response.CompleteAsync();
+                return;
+            }
             try
             {
-                if (context.Request.HttpMethod.Equals("GET")
-                    && (context.Request.Url?.LocalPath.Equals("/brehchatping") ?? false)
-                    && !context.Request.IsWebSocketRequest)
+                foreach(var pair in tokens)
                 {
-                    context.Response.StatusCode = 200;
-                    context.Response.ContentType = "plaintext";
-                    context.Response.ContentEncoding = Encoding.UTF8;
-                    var res = Encoding.UTF8.GetBytes("Pong!");
-                    context.Response.ContentLength64 = res.Length;
-                    context.Response.OutputStream.Write(res);
-                    context.Response.Close();
-                    return;
-                }
-                if (!context.Request.IsWebSocketRequest)
-                {
-                    context.Response.StatusCode = 400;
-                    context.Response.Close();
-                    return;
-                }
-                string? username = null;
-                try
-                {
-                    foreach (var pair in tokens)
+                    if (pair[0].Equals(token))
                     {
-                        if (pair[0].Equals(context.Request.Headers["Token"]))
-                            username = pair[1];
+                        username = pair[1];
+                        break;
                     }
-                    ;
-                    if (username == null)
-                        throw new Exception("notfound");
+                    
                 }
-                catch
-                {
-                    //Console.WriteLine(ex);
-                    context.Response.StatusCode = 403;
-                    context.Response.Close();
-                    return;
-                }
-                var sock = await context.AcceptWebSocketAsync("brehchat");
-                if (sock == null)
-                    return;
-                if (!sock.WebSocket.SubProtocol?.Equals("brehchat") ?? false)
-                {
-                    await sock.WebSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation,
-                        "client must speak brehchat",
-                        new());
-                    return;
-                }
+                if (username == null)
+                    throw new Exception();
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Console.WriteLine("[WARNING] user rejected because of malformed config");
+                ctx.Response.StatusCode = 403;
+                await ctx.Response.CompleteAsync();
+                return;
+            }
+            catch
+            {
+                ctx.Response.StatusCode = 403;
+                await ctx.Response.CompleteAsync();
+                return;
+            }
 
-                User user = new(sock.WebSocket, username);
+            User? user = null;
+            try
+            {
+                WebSocket sock = await ctx.WebSockets.AcceptWebSocketAsync("brehchat");
+
+                user = new User(sock, username, CancellationTokenSource.CreateLinkedTokenSource(tokenSource.Token));
+                {
+
+                };
                 await mut.WaitAsync();
                 try
                 {
-                    /*
-                    foreach (var us in users)
-                    {
-                        if(us.UserName.Equals(user.UserName))
-                        {
-                            user.WebSocket.Abort();
-                            return;
-                        }
-                    }*/
-                    users.Add(user);
+                    users.Add(user.Value);
                 }
                 finally
                 {
                     mut.Release();
                 }
-                Console.WriteLine($"Accepted user: {user.UserName}");
-                await HandleUser(user);
             }
             catch
             {
-                //Console.WriteLine(ex);
+                return;
             }
+            await HandleUser(user.Value);
         }
 
         private async Task HandleUser(User user)
