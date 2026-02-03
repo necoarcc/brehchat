@@ -169,7 +169,7 @@ namespace brehchat_dotnet
             }
         }
 
-        private static Color[] colors = [Color.PaleVioletRed, Color.DarkOrange, Color.DarkOliveGreen, Color.DeepSkyBlue, Color.BlueViolet];
+        private static Color[] colors = [Color.PaleVioletRed, Color.DarkOrange, Color.LimeGreen, Color.DeepSkyBlue, Color.BlueViolet];
         private void AppendToChat(Network.Msg what)
         {
             chatcontainer.SuspendLayout();
