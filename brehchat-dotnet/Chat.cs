@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Channels;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -168,6 +169,7 @@ namespace brehchat_dotnet
             }
         }
 
+        private static Color[] colors = [Color.PaleVioletRed, Color.DarkOrange, Color.DarkOliveGreen, Color.DeepSkyBlue, Color.BlueViolet];
         private void AppendToChat(Network.Msg what)
         {
             chatcontainer.SuspendLayout();
@@ -187,7 +189,16 @@ namespace brehchat_dotnet
 
             var userstring = what.username + ": ";
 
-            chatcontainer.SelectionColor = Color.BlueViolet;
+            if (what.username.Equals("System") || string.IsNullOrWhiteSpace(what.username))
+                chatcontainer.SelectionColor = Color.White;
+            else
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(what.username);
+                uint sum = 0;
+                foreach (var c in bytes)
+                    sum += c;
+                chatcontainer.SelectionColor = colors[sum % colors.Length];
+            }
             chatcontainer.AppendText(userstring);
 
             chatcontainer.SelectionColor = Color.White; 

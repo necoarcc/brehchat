@@ -35,6 +35,8 @@ namespace brehchat_server
                 var read = r.ReadToEnd();
                 tokens = JsonSerializer.Deserialize<List<List<string>>>(read) ?? throw new Exception("tokens.json is wrong");
             }
+            if (tokens.Any(item => item[1].Equals("System", StringComparison.OrdinalIgnoreCase)))
+                Console.WriteLine("[WARNING] You have configured a user with the name 'System'. That may cause confusion with others.");
         }
 
         public async Task Run(List<string> prefixes)
