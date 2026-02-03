@@ -1,5 +1,6 @@
 ﻿using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 
 namespace brehchat_dotnet
 {
@@ -8,6 +9,9 @@ namespace brehchat_dotnet
         public SettingsForm()
         {
             InitializeComponent();
+
+            foreach (var key in Enum.GetNames<VIRTUAL_KEY>())
+                focbox.Items.Add(key);
         }
 
         public void StealFocus()
@@ -47,6 +51,7 @@ namespace brehchat_dotnet
             wbox.Value = Config.w;
             hbox.Value = Config.h;
             opacbox.Value = Config.Opacity;
+            focbox.SelectedItem = Config.Focuskey.ToString();
             screenbox.Items.Clear();
             for (int i = 1; i <= Screen.AllScreens.Length; ++i)
             {
@@ -70,6 +75,8 @@ namespace brehchat_dotnet
             Config.w = (int)wbox.Value;
             Config.h = (int)hbox.Value;
             Config.Opacity = (int)opacbox.Value;
+            if (Enum.TryParse<VIRTUAL_KEY>(focbox.SelectedItem?.ToString(), true, out var foc))
+                Config.Focuskey = foc;
             Config.Write();
             Hide();
         }

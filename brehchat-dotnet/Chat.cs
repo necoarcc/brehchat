@@ -141,6 +141,7 @@ namespace brehchat_dotnet
                             }, tokenSource.Token);
                             continue;
                         }
+                        if(!Config.InSettings)
                         await InvokeAsync(() =>
                         {
                             if (GetLatestChat().Equals("System: Reconnecting..."))
@@ -268,7 +269,7 @@ namespace brehchat_dotnet
 
             if (_prev_press)
             {
-                if ((PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_OEM_6) & 0x8000) == 0)
+                if ((PInvoke.GetAsyncKeyState((int)Config.Focuskey) & 0x8000) == 0)
                 {
                     _prev_press = false;
                     StealFocus();
@@ -279,10 +280,10 @@ namespace brehchat_dotnet
 
 
 
-            if ((PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_CONTROL) & 0x8000) == 0 &&
-                (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_SHIFT) & 0x8000) == 0 &&
-                (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_MENU) & 0x8000) == 0 &&
-                (PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_OEM_6) & 0x8000) != 0)
+            if (//(PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_CONTROL) & 0x8000) == 0 &&
+                //(PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_SHIFT) & 0x8000) == 0 &&
+                //(PInvoke.GetAsyncKeyState((int)VIRTUAL_KEY.VK_MENU) & 0x8000) == 0 &&
+                (PInvoke.GetAsyncKeyState((int)Config.Focuskey) & 0x8000) != 0)
             {
                 _prev_press = true;
             }

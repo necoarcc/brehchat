@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 
 namespace brehchat_dotnet
 {
     static internal class Config
     {
-        static volatile public string Host = "yourserverhere";
+        static volatile public string Host = "wss://yourserverhere:port";
         static public string Target = "app.exe";
         static public int x = 0;
         static public int y = 0;
@@ -15,6 +16,7 @@ namespace brehchat_dotnet
         static public int h = 600;
         static volatile public string Token = "yourtokenhere";
         static public int Opacity = 50;
+        static public VIRTUAL_KEY Focuskey = VIRTUAL_KEY.VK_OEM_6;
         static public Form? Overlay;
         static public readonly Form settings = new SettingsForm();
         static volatile public bool InSettings = false;
@@ -51,6 +53,7 @@ namespace brehchat_dotnet
                 Host = lines[5];
                 Token = lines[6];
                 Opacity = int.Parse(lines[7]);
+                Focuskey = Enum.Parse<VIRTUAL_KEY>(lines[8]);
             } catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to read config! {ex}");
@@ -64,7 +67,7 @@ namespace brehchat_dotnet
         {
             try
             {
-                File.WriteAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "chat.cfg"), $"{w}\n{h}\n{x}\n{y}\n{Target}\n{Host}\n{Token}\n{Opacity}");
+                File.WriteAllText(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "chat.cfg"), $"{w}\n{h}\n{x}\n{y}\n{Target}\n{Host}\n{Token}\n{Opacity}\n{Enum.GetName(Focuskey)}");
             } catch
             {
                 Debug.WriteLine("Failed to write config!");

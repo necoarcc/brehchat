@@ -38,6 +38,7 @@
             Label label8;
             Label label9;
             Label label10;
+            Label label11;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             serverbox = new TextBox();
             testserverbutt = new Button();
@@ -52,6 +53,7 @@
             cancelbutt = new Button();
             targetbox = new TextBox();
             opacbox = new NumericUpDown();
+            focbox = new ComboBox();
             label1 = new Label();
             label2 = new Label();
             label4 = new Label();
@@ -62,6 +64,7 @@
             label8 = new Label();
             label9 = new Label();
             label10 = new Label();
+            label11 = new Label();
             ((System.ComponentModel.ISupportInitialize)xbox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)ybox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)wbox).BeginInit();
@@ -168,6 +171,16 @@
             label10.Size = new Size(48, 15);
             label10.TabIndex = 25;
             label10.Text = "Opacity";
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.ForeColor = Color.White;
+            label11.Location = new Point(223, 211);
+            label11.Name = "label11";
+            label11.Size = new Size(59, 15);
+            label11.TabIndex = 27;
+            label11.Text = "Focus key";
             // 
             // serverbox
             // 
@@ -283,12 +296,24 @@
             opacbox.Size = new Size(48, 23);
             opacbox.TabIndex = 24;
             // 
+            // focbox
+            // 
+            focbox.DropDownStyle = ComboBoxStyle.DropDownList;
+            focbox.FormattingEnabled = true;
+            focbox.Location = new Point(223, 233);
+            focbox.Name = "focbox";
+            focbox.Size = new Size(114, 23);
+            focbox.Sorted = true;
+            focbox.TabIndex = 26;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.Black;
             ClientSize = new Size(349, 332);
+            Controls.Add(label11);
+            Controls.Add(focbox);
             Controls.Add(label10);
             Controls.Add(opacbox);
             Controls.Add(label9);
@@ -345,5 +370,6 @@
         private Button cancelbutt;
         private TextBox targetbox;
         private NumericUpDown opacbox;
+        private ComboBox focbox;
     }
 }
