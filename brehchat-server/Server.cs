@@ -144,6 +144,7 @@ namespace brehchat_server
             {
                 return;
             }
+            Console.WriteLine($"Accepted user: {username}");
             await HandleUser(user.Value);
         }
 
