@@ -18,11 +18,11 @@ namespace brehchat_dotnet
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(Config.Host))
+                if (string.IsNullOrWhiteSpace(Config.Host) || !Uri.TryCreate(Config.Host, UriKind.Absolute, out var screened))
                     return new();
-                UriBuilder builder = new(Config.Host);
+                UriBuilder builder = new(screened);
 #if !DEBUG
-                if(!builder.Scheme.Equals("wss", StringComparison.OrdinalIgnoreCase))
+                if (!builder.Scheme.Equals("wss", StringComparison.OrdinalIgnoreCase))
                 {
                     builder.Scheme = "wss";
                 }
