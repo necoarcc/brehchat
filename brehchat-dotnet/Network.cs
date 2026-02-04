@@ -21,12 +21,12 @@ namespace brehchat_dotnet
                 if (string.IsNullOrWhiteSpace(Config.Host))
                     return new();
                 UriBuilder builder = new(Config.Host);
-                if(!builder.Scheme.Equals("wss"))
-                {
 #if !DEBUG
+                if(!builder.Scheme.Equals("wss", StringComparison.OrdinalIgnoreCase))
+                {
                     builder.Scheme = "wss";
-#endif
                 }
+#endif
                 builder.Path = "";
                 return builder;
             }
